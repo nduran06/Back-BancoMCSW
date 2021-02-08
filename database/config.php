@@ -7,4 +7,4 @@ $db = [
     'db' => 'd29grojbmdsft4'
 ];
 
-?>
+
