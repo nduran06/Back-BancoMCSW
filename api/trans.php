@@ -1,9 +1,14 @@
 <?php
 
 include('../classes/Transaccion.php');
-include('../persistence/TransDB.php');
+include('../persistence/transDB.php');
+include('../persistence/userDB.php');
 include('../persistence/existedClientsDB.php');
+include('../database/config.php');
+include('../database/utils.php');
 
+$db = dbInfo();
+$dbConn =  connect($db);
 
 $link = $_SERVER['PHP_SELF'];
 $link_array = explode('/',$link);
@@ -16,7 +21,6 @@ header('Content-Type: application/JSON');
 
 if($page == 'transaction') {
 
-#t($origen, $destino, $bancoOrigen, $bancoDestino, $saldo, $estado, $fecha)
     // Crear transacción
     // /trans.php/transaction/new
     if ($action == 'new') {
@@ -51,39 +55,27 @@ if($page == 'transaction') {
     // /user.php/clients/getALl
     elseif ($action == 'getAll'){
 
+        $db = new TransDB;
+
         switch ($method) {
 
             case 'POST':
                 $usuario = $_POST['usuario'];
-                $tipo = $_POST['tipo'];
 
-                if($tipo == 'admin') {
+                $tipo = $db->getUserByUsername($usuario);
 
-                    if (isset($_GET['id'])) {
-                        try {
-                            header('HTTP/1.1 200 OK');
-                            $db = new UserDB;
-                            $response = $db->getUser($_GET['id']);
-                            echo json_encode($response, JSON_PRETTY_PRINT);
-                        } catch (exception $e) {
-                            header("HTTP/1.1 400 BAD REQUEST");
-                            echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
-                        } finally {
-                            exit();
-                        }
-                    } else {
-                        try {
-                            header('HTTP/1.1 200 OK');
-                            $db = new UserDB;
-                            $response = $db->getUsers();
+                if($tipo == 'auditor') {
 
-                            echo json_encode($response->fetchAll(), JSON_PRETTY_PRINT);
-                            exit();
+                    try {
+                        header('HTTP/1.1 200 OK');
+                        $response = $db->getUsers();
 
-                        } catch (exception $e) {
-                            header("HTTP/1.1 400 BAD REQUEST");
-                            echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
-                        }
+                        echo json_encode($response->fetchAll(), JSON_PRETTY_PRINT);
+                        exit();
+
+                    } catch (exception $e) {
+                        header("HTTP/1.1 400 BAD REQUEST");
+                        echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
                     }
                 }
 

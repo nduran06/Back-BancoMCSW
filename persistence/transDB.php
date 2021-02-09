@@ -7,11 +7,11 @@ class TransDB {
     private $db;
     private $dbConn;
 
-    public function __construct() {
+    public function __construct($db, $dbConn) {
 
         try{
-            $this->db = dbInfo();
-            $this->dbConn =  connect($this->db);
+            $this->db = $db;
+            $this->dbConn =  $dbConn;
         }catch (exception $e) {
             http_response_code(500);
             exit;
@@ -38,6 +38,15 @@ class TransDB {
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $result;
+    }
+
+    public function getAllUserTrans($numeroCuenta){
+
+        $sql = $this->dbConn->prepare("SELECT * FROM transaccion");
+        $sql->execute();
+        $sql->setFetchMode(PDO::FETCH_ASSOC);
+
+        return $sql;
     }
 
     public function createTrans($trans){
