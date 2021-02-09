@@ -2,6 +2,7 @@
 
 include('../classes/Usuario.php');
 include('../persistence/existedClientsDB.php');
+include('../persistence/userDB.php');
 include('../database/config.php');
 include('../database/utils.php');
 
@@ -49,11 +50,25 @@ if($page == 'clients') {
             case 'POST':
                 try {
                     header('HTTP/1.1 200 OK');
+
                     $db = new UserDB($db, $dbConn);;
-                    $usuario = new Usuario($_POST['documento'], $_POST['nombre'], $_POST['usuario'],
-                        $_POST['passwd'], $_POST['tipo']);
-                    $response = $db->createUser($usuario);
-                    echo json_encode($response, JSON_PRETTY_PRINT);
+                    $dbExisted = new ExistedClientsDB($db, $dbConn);
+
+                    $responseExisted = $dbExisted->getExistedUser($_POST['documento']);
+
+                    if($responseExisted != false) {
+
+                        $usuario = new Usuario($_POST['documento'], $_POST['nombre'], $_POST['usuario'],
+                            $_POST['passwd'], $_POST['tipo']);
+                        $response = $db->createUser($usuario);
+
+                        echo json_encode($response, JSON_PRETTY_PRINT);
+                    }
+                    else{
+                        header("HTTP/1.1 400 BAD REQUEST");
+                        echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
+                    }
+
                 } catch (exception $e) {
                     header("HTTP/1.1 400 BAD REQUEST");
                     echo json_encode("datos inválidos", JSON_PRETTY_PRINT);

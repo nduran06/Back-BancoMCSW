@@ -66,9 +66,9 @@
         }
 
         public function createUser($user){
-
+            
             $doc = $user->getDoc();
-            $usuario = $user->getUsuario();
+            $usuario = $user->getUser();
             $nombre = $user->getName();
             $passwd = $user->getPass();
             $tipo = $user->getType();
@@ -79,7 +79,7 @@
                   (:doc, :usuario, :passwd, :nombre, :tipo)";
             $statement = $this->dbConn->prepare($sql);
 
-            $statement->bindValue(':documento', $doc);
+            $statement->bindValue(':doc', $doc);
             $statement->bindValue(':usuario', $usuario);
             $statement->bindValue(':passwd', $passwd);
             $statement->bindValue(':nombre', $nombre);
@@ -87,7 +87,7 @@
 
             $statement->execute();
 
-            return $usuario;
+            return $tipo;
         }
 
     }
