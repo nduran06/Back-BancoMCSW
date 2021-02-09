@@ -1,6 +1,6 @@
 <?php
-    include($_SERVER['DOCUMENT_ROOT'].'/database/config.php');
-    include($_SERVER['DOCUMENT_ROOT'].'/database/utils.php');
+    include('../database/config.php');
+    include('../database/utils.php');
 
     class UserDB {
 
@@ -19,35 +19,50 @@
         }
 
         public function getUsers(){
-           header('Content-Type: application/JSON');
 
-            $stmt = $this->dbConn->prepare("SELECT * FROM usuario ");
+            $sql = $this->dbConn->prepare("SELECT * FROM usuario");
+            $sql->execute();
+            $sql->setFetchMode(PDO::FETCH_ASSOC);
 
+            return $sql;
+        }
+
+        public function getUser($id){
+
+            $sql = "SELECT * FROM usuario WHERE id=:id";
+
+            $stmt = $this->dbConn->prepare($sql);
+            $stmt->bindValue(':id', $id);
             $stmt->execute();
+
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
             return $result;
         }
 
-        public function createUser($input){
+        public function createUser($user){
 
-            $usuario = $input['usuario'];
-            $passwd = $input['passwd'];
-            $tipo = $input['tipo'];
+            $doc = $user->getDoc();
+            $usuario = $user->getUsuario();
+            $nombre = $user->getName();
+            $passwd = $user->getPass();
+            $tipo = $user->getType();
 
             $sql = "INSERT INTO usuario
-                  (usuario, passwd, tipo)
+                  (documento, usuario, passwd, nombre, tipo)
                   VALUES
-                  (:usuario, :passwd, :tipo)";
+                  (:doc, :usuario, :passwd, :nombre, :tipo)";
             $statement = $this->dbConn->prepare($sql);
 
+            $statement->bindValue(':documento', $doc);
             $statement->bindValue(':usuario', $usuario);
             $statement->bindValue(':passwd', $passwd);
+            $statement->bindValue(':nombre', $nombre);
             $statement->bindValue(':tipo', $tipo);
 
             $statement->execute();
 
-            return $input;
+            return $usuario;
         }
 
     }

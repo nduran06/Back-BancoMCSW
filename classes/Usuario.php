@@ -1,43 +1,106 @@
 <?php
 
-    class Users {
+    class Usuario {
 
         public $_id;
+        public $_doc;
         public $_name;
         public $_user;
         public $_pass;
+        public $_type;
 
-        function __construct($_id, $_name, $_user, $_pass) {
-            $this->_id = $_id;
+
+        function __construct($_doc, $_name, $_user, $_pass, $_type) {
+            $this->_doc = $_doc;
             $this->_name = $_name;
             $this->_user = $_user;
             $this->_pass = $_pass;
+            $this->_type = $_type;
         }
 
-        public function getDoc(){
+        function __construct0($_id, $_doc, $_name, $_user, $_pass, $_type) {
+            $this->_id = $_id;
+            $this->_doc = $_doc;
+            $this->_name = $_name;
+            $this->_user = $_user;
+            $this->_pass = $_pass;
+            $this->_type = $_type;
+        }
+
+        /**
+         * @return mixed
+         */
+        public function getId()
+        {
             return $this->_id;
         }
-        public function getName(){
-            return $this->_name;
+
+        /**
+         * @param mixed $id
+         */
+        public function setId($id)
+        {
+            $this->_id = $id;
         }
+
+        /**
+         * @return mixed
+         */
+        public function getDoc()
+        {
+            return $this->_doc;
+        }
+
+        /**
+         * @param mixed $doc
+         */
+        public function setDoc($doc)
+        {
+            $this->_doc = $doc;
+        }
+
         public function getUser(){
             return $this->_user;
         }
+
+        public function setUser($user){
+            $this->_user=$user;
+        }
+
         public function getPass(){
             return $this->_pass;
         }
 
-        public function setDoc($id){
-            $this->_id=$id;
+        public function setPass($pass){
+            $this->_pass=$pass;
         }
+
+        /**
+         * @return mixed
+         */
+        public function getName()
+        {
+            return $this->_name;
+        }
+
         public function setName($name){
             $this->_name=$name;
         }
-        public function setUser($user){
-            $this->_user=$user;
+
+        /**
+         * @return mixed
+         */
+        public function getType()
+        {
+            return $this->_type;
         }
-        public function setPass($pass){
-            $this->_pass=$pass;
+
+        /**
+         * @param mixed $type
+         */
+        public function setType($type)
+        {
+            $this->_type = $type;
         }
 
     }

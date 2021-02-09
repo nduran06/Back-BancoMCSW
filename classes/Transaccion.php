@@ -5,14 +5,28 @@
         private $id;
         private $origen;
         private $destino;
+        private $bancoOrigen;
+        private $bancoDestino;
         private $saldo;
         private $estado;
         private $fecha;
 
-        function __construct($id, $origen, $destino, $saldo, $estado, $fecha) {
+        function __construct($origen, $destino, $bancoOrigen, $bancoDestino, $saldo, $estado, $fecha) {
+            $this->origen = $origen;
+            $this->destino = $destino;
+            $this->bancoOrigen = $bancoOrigen;
+            $this->bancoDestino = $bancoDestino;
+            $this->saldo = $saldo;
+            $this->estado = $estado;
+            $this->fecha = $fecha;
+        }
+
+        function __construct0($id, $origen, $destino, $bancoOrigen, $bancoDestino, $saldo, $estado, $fecha) {
             $this->id = $id;
             $this->origen = $origen;
             $this->destino = $destino;
+            $this->bancoOrigen = $bancoOrigen;
+            $this->bancoDestino = $bancoDestino;
             $this->saldo = $saldo;
             $this->estado = $estado;
             $this->fecha = $fecha;
@@ -64,6 +78,38 @@
         public function setDestino($destino)
         {
             $this->destino = $destino;
+        }
+
+        /**
+         * @return mixed
+         */
+        public function getBancoOrigen()
+        {
+            return $this->bancoOrigen;
+        }
+
+        /**
+         * @param mixed $bancoOrigen
+         */
+        public function setBancoOrigen($bancoOrigen)
+        {
+            $this->bancoOrigen = $bancoOrigen;
+        }
+
+        /**
+         * @return mixed
+         */
+        public function getBancoDestino()
+        {
+            return $this->bancoDestino;
+        }
+
+        /**
+         * @param mixed $bancoDestino
+         */
+        public function setBancoDestino($bancoDestino)
+        {
+            $this->bancoDestino = $bancoDestino;
         }
 
         /**
