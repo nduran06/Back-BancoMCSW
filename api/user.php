@@ -1,9 +1,12 @@
 <?php
 
 include('../classes/Usuario.php');
-include('../persistence/userDB.php');
 include('../persistence/existedClientsDB.php');
+include('../database/config.php');
+include('../database/utils.php');
 
+$db = dbInfo();
+$dbConn =  connect($db);
 
 $link = $_SERVER['PHP_SELF'];
 $link_array = explode('/',$link);
@@ -23,7 +26,7 @@ if($page == 'clients') {
             case 'POST':
                 try {
                     header('HTTP/1.1 200 OK');
-                    $db = new ExistedClientsDB;
+                    $db = new ExistedClientsDB($db, $dbConn);
                     $document = $_POST['documento'];
                     $response = $db->getExistedUser($document);
                     echo json_encode($response, JSON_PRETTY_PRINT);
@@ -46,7 +49,7 @@ if($page == 'clients') {
             case 'POST':
                 try {
                     header('HTTP/1.1 200 OK');
-                    $db = new UserDB;
+                    $db = new UserDB($db, $dbConn);;
                     $usuario = new Usuario($_POST['documento'], $_POST['nombre'], $_POST['usuario'],
                         $_POST['passwd'], $_POST['tipo']);
                     $response = $db->createUser($usuario);

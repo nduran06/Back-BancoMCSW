@@ -4,7 +4,11 @@ include('../classes/Transaccion.php');
 include('../persistence/transDB.php');
 include('../persistence/userDB.php');
 include('../persistence/existedClientsDB.php');
+include('../database/config.php');
+include('../database/utils.php');
 
+$db = dbInfo();
+$dbConn =  connect($db);
 
 $link = $_SERVER['PHP_SELF'];
 $link_array = explode('/',$link);
@@ -57,15 +61,14 @@ if($page == 'transaction') {
 
             case 'POST':
                 $usuario = $_POST['usuario'];
-                $dbUser = new UserDB;
 
-                $tipo = $dbUser->getUserByUsername($usuario);
+                $tipo = $db->getUserByUsername($usuario);
 
                 if($tipo == 'auditor') {
 
                     try {
                         header('HTTP/1.1 200 OK');
-                        $response = $db->getAllTrans();
+                        $response = $db->getUsers();
 
                         echo json_encode($response->fetchAll(), JSON_PRETTY_PRINT);
                         exit();

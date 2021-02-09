@@ -1,18 +1,15 @@
 <?php
 
-    include('../database/config.php');
-    include('../database/utils.php');
-
     class ExistedClientsDB {
 
         private $db;
         private $dbConn;
 
-        public function __construct() {
+        public function __construct($db, $dbConn) {
 
             try{
-                $this->db = dbInfo();
-                $this->dbConn =  connect($this->db);
+                $this->db = $db;
+                $this->dbConn =  $dbConn;
             }catch (exception $e) {
                 http_response_code(500);
                 exit;

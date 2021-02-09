@@ -3,6 +3,11 @@
 include('../classes/Usuario.php');
 include('../persistence/userDB.php');
 include('../persistence/existedClientsDB.php');
+include('../database/config.php');
+include('../database/utils.php');
+
+$db = dbInfo();
+$dbConn =  connect($db);
 
 // /login.php
 
@@ -13,7 +18,7 @@ switch ($method) {
     case 'POST':
         try {
             header('HTTP/1.1 200 OK');
-            $db = new UserDB;
+            $db = new UserDB($db, $dbConn);
 
             $usuario = $_POST['usuario'];
             $passwd = $_POST['passwd'];
