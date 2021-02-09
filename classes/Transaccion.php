@@ -114,5 +114,16 @@
             $this->fecha = $fecha;
         }
 
+        public function toArray()
+        {
+            return  array(
+                "id"=>$this->id,
+                "origen"=>$this->origen,
+                "destino"=>$this->destino,
+                "saldo"=>$this->saldo,
+                "estado"=>$this->estado,
+                "fecha"=>$this->fecha
+            );
+        }
 
     }
