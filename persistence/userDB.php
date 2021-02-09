@@ -40,6 +40,33 @@
             return $result;
         }
 
+        public function getUserByUsername($usuario){
+
+            $sql = "SELECT * FROM usuario WHERE usuario=:usuario";
+
+            $stmt = $this->dbConn->prepare($sql);
+            $stmt->bindValue(':usuario', $usuario);
+            $stmt->execute();
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $result;
+        }
+
+        public function loginUser ($usuario, $passwd) {
+
+            $sql = "SELECT tipo FROM usuario WHERE usuario=:usuario AND passwd=:passwd";
+
+            $stmt = $this->dbConn->prepare($sql);
+            $stmt->bindValue(':usuario', $usuario);
+            $stmt->bindValue(':passwd', $passwd);
+            $stmt->execute();
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $result;
+        }
+
         public function createUser($user){
 
             $doc = $user->getDoc();

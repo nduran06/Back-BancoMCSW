@@ -63,54 +63,6 @@ if($page == 'clients') {
         }
     }
 
-    // Obtener usuarios
-    // /user.php/clients/getALl
-    elseif ($action == 'getAll'){
-
-        switch ($method) {
-
-            case 'POST':
-                $usuario = $_POST['usuario'];
-                $tipo = $_POST['tipo'];
-
-                if($tipo == 'admin') {
-
-                    if (isset($_GET['id'])) {
-                        try {
-                            header('HTTP/1.1 200 OK');
-                            $db = new UserDB;
-                            $response = $db->getUser($_GET['id']);
-                            echo json_encode($response, JSON_PRETTY_PRINT);
-                        } catch (exception $e) {
-                            header("HTTP/1.1 400 BAD REQUEST");
-                            echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
-                        } finally {
-                            exit();
-                        }
-                    } else {
-                        try {
-                            header('HTTP/1.1 200 OK');
-                            $db = new UserDB;
-                            $response = $db->getUsers();
-
-                            echo json_encode($response->fetchAll(), JSON_PRETTY_PRINT);
-                            exit();
-
-                        } catch (exception $e) {
-                            header("HTTP/1.1 400 BAD REQUEST");
-                            echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
-                        }
-                    }
-                }
-
-                else{
-                    header("HTTP/1.1 400 BAD REQUEST");
-                }
-
-                break;
-        }
-    }
-
     else {
         header("HTTP/1.1 404 BAD REQUEST");
     }
