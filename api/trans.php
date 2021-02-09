@@ -1,7 +1,7 @@
 <?php
 
-include('../classes/Usuario.php');
-include('../persistence/userDB.php');
+include('../classes/Transaccion.php');
+include('../persistence/TransDB.php');
 include('../persistence/existedClientsDB.php');
 
 
@@ -14,44 +14,28 @@ $action = end($link_array);
 $method = $_SERVER['REQUEST_METHOD'];
 header('Content-Type: application/JSON');
 
-if($page == 'clients') {
+if($page == 'transaction') {
 
-    // Ver si el usuario tiene una cuenta abierta
-    // /user.php/clients/valid
-    if ($action == 'valid') {
+#t($origen, $destino, $bancoOrigen, $bancoDestino, $saldo, $estado, $fecha)
+    // Crear transacción
+    // /trans.php/transaction/new
+    if ($action == 'new') {
         switch ($method) {
             case 'POST':
                 try {
                     header('HTTP/1.1 200 OK');
-                    $db = new ExistedClientsDB;
-                    $document = $_POST['documento'];
-                    $response = $db->getExistedUser($document);
+                    $db = new TransDB;
+
+                    $date = new DateTime();
+
+                    $trans = new Transaccion($_POST['origen'], $_POST['destino'], $_POST['banco_origen'],
+                        $_POST['banco_destino'], $_POST['saldo'], $_POST['estado'], $date->format('Ymd\Thms'));
+
+                    $response = $db->createTrans($trans);
+
                     echo json_encode($response, JSON_PRETTY_PRINT);
-                } catch (exception $e) {
-                    header("HTTP/1.1 400 BAD REQUEST");
-                    echo json_encode("Cuenta no encontrada", JSON_PRETTY_PRINT);
                 }
-                break;
-
-            default://metodo NO soportado
-                echo 'METODO NO SOPORTADO';
-                break;
-        }
-    }
-
-    // Crear usuario
-    // /user.php/clients/add
-    elseif ($action == 'add') {
-        switch ($method) {
-            case 'POST':
-                try {
-                    header('HTTP/1.1 200 OK');
-                    $db = new UserDB;
-                    $usuario = new Usuario($_POST['documento'], $_POST['nombre'], $_POST['usuario'],
-                        $_POST['passwd'], $_POST['tipo']);
-                    $response = $db->createUser($usuario);
-                    echo json_encode($response, JSON_PRETTY_PRINT);
-                } catch (exception $e) {
+                catch (exception $e) {
                     header("HTTP/1.1 400 BAD REQUEST");
                     echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
                 }
