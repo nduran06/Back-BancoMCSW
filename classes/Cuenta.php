@@ -13,8 +13,8 @@
             $this->_balance = $_balance;
             $this->_type = $_type;
             $this->_state = $_state;
-            $this->_state = $_userID;
-            $this->_state = $_bancoID;
+            $this->_userID = $_userID;
+            $this->_bancoID = $_bancoID;
         }
 
         public function getNumber(){
@@ -49,10 +49,10 @@
             $this->_state=$state;
         }
         public function setType($userID){
-            $this->_type=$userID;
+            $this->_userID=$userID;
         }
         public function setState($bancoID){
-            $this->_state=$bancoID;
+            $this->_bancoID=$bancoID;
         }
         
     }
