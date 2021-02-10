@@ -28,5 +28,18 @@
 
             return $result;
         }
+        
+        public function getExistedAccount($cuenta){
+
+            $sql = "SELECT * FROM cuentas_existentes WHERE num_cuenta=:cuenta";
+
+            $stmt = $this->dbConn->prepare($sql);
+            $stmt->bindValue(':cuenta', $cuenta);
+            $stmt->execute();
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $result;
+        }
 
     }
