@@ -27,25 +27,23 @@
 
         
 
-        public function createAccount($user){
+        public function createAccount($account){
             
-            $doc = $user->getDoc();
-            $usuario = $user->getUser();
-            $nombre = $user->getName();
-            $passwd = $user->getPass();
-            $tipo = $user->getType();
+            $number = $account->getNumber();
+            $balance = $account->getBalance();
+            $type = $account->getType();
+            $state = $account->getState();
 
-            $sql = "INSERT INTO usuario
-                  (documento, usuario, passwd, nombre, tipo)
+            $sql = "INSERT INTO cuenta
+                  (numero, saldo, tipo, estado)
                   VALUES
-                  (:doc, :usuario, :passwd, :nombre, :tipo)";
+                  (:n, :b, :t, :s)";
             $statement = $this->dbConn->prepare($sql);
 
-            $statement->bindValue(':doc', $doc);
-            $statement->bindValue(':usuario', $usuario);
-            $statement->bindValue(':passwd', $passwd);
-            $statement->bindValue(':nombre', $nombre);
-            $statement->bindValue(':tipo', $tipo);
+            $statement->bindValue(':n', $number);
+            $statement->bindValue(':b', $balance);
+            $statement->bindValue(':t', $type);
+            $statement->bindValue(':s', $state);
 
             $statement->execute();
             
