@@ -28,20 +28,23 @@ if($page == 'transaction') {
             case 'POST':
                 try {
                     header('HTTP/1.1 200 OK');
-                    $db = new TransDB;
+
+                    $dbTrans = new TransDB($db, $dbConn);
 
                     $date = new DateTime();
 
-                    $trans = new Transaccion($_POST['origen'], $_POST['destino'], $_POST['banco_origen'],
-                        $_POST['banco_destino'], $_POST['saldo'], $_POST['estado'], $date->format('Ymd\Thms'));
+                    $trans = new Transaccion($_POST['origen'], $_POST['destino'], "MIBANCO",
+                        $_POST['banco_destino'], $_POST['saldo'], "en proceso", $date->format('Y-m-d H:i:s'));
 
-                    $response = $db->createTrans($trans);
+                    echo json_encode($trans->getBancoOrigen(), JSON_PRETTY_PRINT);
+
+                    $response = $dbTrans->createTrans($trans);
 
                     echo json_encode($response, JSON_PRETTY_PRINT);
                 }
                 catch (exception $e) {
                     header("HTTP/1.1 400 BAD REQUEST");
-                    echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
+                    echo json_encode($e, JSON_PRETTY_PRINT);
                 }
                 break;
 
@@ -55,7 +58,7 @@ if($page == 'transaction') {
     // /user.php/clients/getALl
     elseif ($action == 'getAll'){
 
-        $db = new TransDB;
+        $db = new TransDB($db, $dbConn);
 
         switch ($method) {
 
