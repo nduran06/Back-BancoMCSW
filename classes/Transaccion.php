@@ -32,6 +32,7 @@
             $this->fecha = $fecha;
         }
 
+
         /**
          * @return mixed
          */
@@ -166,6 +167,8 @@
                 "id"=>$this->id,
                 "origen"=>$this->origen,
                 "destino"=>$this->destino,
+                "banco_origen"=>$this->bancoOrigen,
+                "banco_destino"=>$this->bancoDestino,
                 "saldo"=>$this->saldo,
                 "estado"=>$this->estado,
                 "fecha"=>$this->fecha

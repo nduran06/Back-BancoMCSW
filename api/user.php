@@ -27,9 +27,9 @@ if($page == 'clients') {
             case 'POST':
                 try {
                     header('HTTP/1.1 200 OK');
-                    $db = new ExistedClientsDB($db, $dbConn);
+                    $dbExistedClients = new ExistedClientsDB($db, $dbConn);
                     $document = $_POST['documento'];
-                    $response = $db->getExistedUser($document);
+                    $response = $dbExistedClients->getExistedUser($document);
                     echo json_encode($response, JSON_PRETTY_PRINT);
                 } catch (exception $e) {
                     header("HTTP/1.1 400 BAD REQUEST");
@@ -51,7 +51,7 @@ if($page == 'clients') {
                 try {
                     header('HTTP/1.1 200 OK');
 
-                    $db = new UserDB($db, $dbConn);;
+                    $dbUser = new UserDB($db, $dbConn);;
                     $dbExisted = new ExistedClientsDB($db, $dbConn);
 
                     $responseExisted = $dbExisted->getExistedUser($_POST['documento']);
@@ -60,7 +60,7 @@ if($page == 'clients') {
 
                         $usuario = new Usuario($_POST['documento'], $_POST['nombre'], $_POST['usuario'],
                             $_POST['passwd'], $_POST['tipo']);
-                        $response = $db->createUser($usuario);
+                        $response = $dbUser->createUser($usuario);
 
                         echo json_encode($response, JSON_PRETTY_PRINT);
                     }

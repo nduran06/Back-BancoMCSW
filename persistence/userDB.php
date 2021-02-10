@@ -66,7 +66,7 @@
         }
 
         public function createUser($user){
-            
+
             $doc = $user->getDoc();
             $usuario = $user->getUser();
             $nombre = $user->getName();

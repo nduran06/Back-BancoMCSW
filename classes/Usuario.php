@@ -3,24 +3,24 @@
     class Usuario {
 
         public $_id;
-        public $doc;
+        public $_doc;
         public $_name;
         public $_user;
         public $_pass;
         public $_type;
 
 
-        function __construct($doc, $_name, $_user, $_pass, $_type) {
-            $this->doc = $doc;
+        function __construct($_doc, $_name, $_user, $_pass, $_type) {
+            $this->_doc = $_doc;
             $this->_name = $_name;
             $this->_user = $_user;
             $this->_pass = $_pass;
             $this->_type = $_type;
         }
 
-        function __construct0($_id, $doc, $_name, $_user, $_pass, $_type) {
+        function __construct0($_id, $_doc, $_name, $_user, $_pass, $_type) {
             $this->_id = $_id;
-            $this->doc = $doc;
+            $this->_doc = $_doc;
             $this->_name = $_name;
             $this->_user = $_user;
             $this->_pass = $_pass;
@@ -48,15 +48,15 @@
          */
         public function getDoc()
         {
-            return $this->doc;
+            return $this->_doc;
         }
 
         /**
          * @param mixed $doc
          */
-        public function setDoc($doc)
+        public function setDoc($_doc)
         {
-            $this->doc = $doc;
+            $this->_doc = $_doc;
         }
 
         public function getUser(){
