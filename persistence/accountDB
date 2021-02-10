@@ -1,0 +1,54 @@
+<?php
+
+    class AccountDB {
+
+        private $db;
+        private $dbConn;
+
+        public function __construct($db, $dbConn) {
+
+            try{
+                $this->db = $db;
+                $this->dbConn =  $dbConn;
+            }catch (exception $e) {
+                http_response_code(500);
+                exit;
+            }
+        }
+
+        public function getAccounts(){
+
+            $sql = $this->dbConn->prepare("SELECT * FROM cuenta");
+            $sql->execute();
+            $sql->setFetchMode(PDO::FETCH_ASSOC);
+
+            return $result;
+        }
+
+        
+
+        public function createAccount($user){
+            
+            $doc = $user->getDoc();
+            $usuario = $user->getUser();
+            $nombre = $user->getName();
+            $passwd = $user->getPass();
+            $tipo = $user->getType();
+
+            $sql = "INSERT INTO usuario
+                  (documento, usuario, passwd, nombre, tipo)
+                  VALUES
+                  (:doc, :usuario, :passwd, :nombre, :tipo)";
+            $statement = $this->dbConn->prepare($sql);
+
+            $statement->bindValue(':doc', $doc);
+            $statement->bindValue(':usuario', $usuario);
+            $statement->bindValue(':passwd', $passwd);
+            $statement->bindValue(':nombre', $nombre);
+            $statement->bindValue(':tipo', $tipo);
+
+            $statement->execute();
+            
+        }
+
+    }
