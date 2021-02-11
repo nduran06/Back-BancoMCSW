@@ -11,6 +11,11 @@ include('../database/utils.php');
 $db = dbInfo();
 $dbConn =  connect($db);
 
+$dbUser = new UserDB($db, $dbConn);
+$dbCuenta = new CuentaDB($db, $dbConn);
+$dbExistedClients = new ExistedClientsDB($db, $dbConn);
+
+
 $link = $_SERVER['PHP_SELF'];
 $link_array = explode('/',$link);
 $page = $link_array[count($link_array)-2];
@@ -29,7 +34,6 @@ if($page == 'clients') {
             case 'POST':
                 try {
                     header('HTTP/1.1 200 OK');
-                    $dbExistedClients = new ExistedClientsDB($db, $dbConn);
                     $document = $_POST['documento'];
                     $response = $dbExistedClients->getExistedUser($document);
                     echo json_encode($response, JSON_PRETTY_PRINT);
@@ -53,11 +57,7 @@ if($page == 'clients') {
                 try {
                     header('HTTP/1.1 200 OK');
 
-                    $dbUser = new UserDB($db, $dbConn);
-                    $dbCuenta = new CuentaDB($db, $dbConn);
-                    $dbExisted = new ExistedClientsDB($db, $dbConn);
-
-                    $responseExisted = $dbExisted->getExistedUser($_POST['documento']);
+                    $responseExisted = $dbExistedClients->getExistedUser($_POST['documento']);
 
                     if($responseExisted != false) {
 
@@ -96,8 +96,6 @@ if($page == 'clients') {
             case 'POST':
                 try {
 
-                    $dbCuenta = new CuentaDB($db, $dbConn);
-
                     $responseBalance= $dbCuenta->getAccountBalance($_POST['num_cuenta']);
 
                     if($responseBalance !== false) {
@@ -121,7 +119,36 @@ if($page == 'clients') {
                 break;
         }
     }
-    
+
+    elseif ($action == 'modifyBal') {
+        switch ($method) {
+            case 'POST':
+                try {
+
+                    $responseBalance= $dbCuenta->updateBalance($_POST['num_cuenta'], $_POST['saldo']);
+
+                    if($responseBalance !== false) {
+                        header('HTTP/1.1 200 OK');
+
+                        echo json_encode($responseBalance, JSON_PRETTY_PRINT);
+                    }
+                    else{
+                        header("HTTP/1.1 400 BAD REQUEST");
+                        echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
+                    }
+
+                } catch (exception $e) {
+                    header("HTTP/1.1 400 BAD REQUEST");
+                    echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
+                }
+                break;
+
+            default://metodo NO soportado
+                echo 'METODO NO SOPORTADO';
+                break;
+        }
+    }
+
     else {
         header("HTTP/1.1 404 BAD REQUEST");
     }
