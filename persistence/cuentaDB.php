@@ -47,4 +47,30 @@ $response['tipo'], 'activa', $response['id'], 1);*/
         return $sql->setFetchMode(PDO::FETCH_ASSOC);
     }
 
+    public function getAccountBalance($cuenta) {
+
+        $sql = "SELECT saldo FROM cuenta WHERE numero=:cuenta";
+
+        $statement = $this->dbConn->prepare($sql);
+        $statement->bindValue(':cuenta', $cuenta);
+        $statement->execute();
+
+        return $statement->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function updateBalance($account, $nuevoSaldo) {
+
+        $sql = "UPDATE cuenta SET saldo=:nuevoSaldo WHERE numero=:cuenta";
+
+        $stmt = $this->dbConn->prepare($sql);
+        $stmt->bindValue(':nuevoSaldo', $nuevoSaldo);
+        $stmt->bindValue(':cuenta', $account);
+
+        $stmt->execute();
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result !== false;
+    }
+
 }

@@ -46,7 +46,7 @@
             $stmt->bindValue(':usuario', $usuario);
             $stmt->execute();
 
-            return $stmt->fetch(PDO::FETCH_ASSOC);;
+            return $stmt->fetch(PDO::FETCH_ASSOC);
         }
 
         public function loginUser ($usuario, $passwd) {
@@ -101,5 +101,6 @@
 
             return ["id" => $id, "tipo" => $tipo];
         }
+
 
     }
