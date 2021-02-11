@@ -91,6 +91,37 @@ if($page == 'clients') {
         }
     }
 
+    elseif ($action == 'getBalance') {
+        switch ($method) {
+            case 'POST':
+                try {
+
+                    $dbCuenta = new CuentaDB($db, $dbConn);
+
+                    $responseBalance= $dbCuenta->getAccountBalance($_POST['num_cuenta']);
+
+                    if($responseBalance !== false) {
+                        header('HTTP/1.1 200 OK');
+
+                        echo json_encode($responseBalance, JSON_PRETTY_PRINT);
+                    }
+                    else{
+                        header("HTTP/1.1 400 BAD REQUEST");
+                        echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
+                    }
+
+                } catch (exception $e) {
+                    header("HTTP/1.1 400 BAD REQUEST");
+                    echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
+                }
+                break;
+
+            default://metodo NO soportado
+                echo 'METODO NO SOPORTADO';
+                break;
+        }
+    }
+    
     else {
         header("HTTP/1.1 404 BAD REQUEST");
     }
