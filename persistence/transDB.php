@@ -93,15 +93,12 @@
             $banco_origen = $trans->getBancoOrigen();
             $banco_destino = $trans->getBancoDestino();
             $saldo = $trans->getSaldo();
-
             $fecha = $trans->getFecha();
+
 
             $validoOri = $this->getValidAccount($origen);
             $validoDes = $banco_origen === $banco_destino ?
                 $this->getValidAccount($destino) : $this->getValidAccountOtherBack($destino, $banco_destino);
-
-            echo($validoOri['saldo']);
-            echo($validoDes['saldo']);
 
             $saldoValidoOri = $this->string_curr_to_num($validoOri['saldo']);
             $saldoValidoDes = $this->string_curr_to_num($validoDes['saldo']);
@@ -110,26 +107,8 @@
             $nuevoSaldoMenos = $saldoValidoOri - $numSaldo;
             $nuevoSaldoMas = $saldoValidoDes + $numSaldo;
 
-            echo(".............................");
 
-            echo($saldoValidoOri);
-            echo(".............................");
-
-            echo($saldoValidoDes);
-            echo(".............................");
-
-            echo($numSaldo);
-            echo(".............................");
-
-            echo(".............................");
-
-            echo($nuevoSaldoMenos);
-            echo(".............................");
-
-            echo($nuevoSaldoMas);
-            echo(".............................");
-
-            if($saldoValidoOri > 0 and $saldoValidoOri >= $numSaldo) {
+            if($validoOri and $validoDes and $saldoValidoOri > 0 and $saldoValidoOri >= $numSaldo) {
                 $sqlOri = "UPDATE cuenta SET saldo=:nuevoSaldoMenos WHERE numero=:cuentaOrigen";
                 $statementOri = $this->dbConn->prepare($sqlOri);
                 $statementOri->bindValue(':nuevoSaldoMenos', $nuevoSaldoMenos);
@@ -144,16 +123,15 @@
                     $statementDes->execute();
                 }
 
+                $trans->setEstado('exitosa');
+
             }
 
             else {
-                $validoOri->false;
+                $trans->setEstado('rechazada');
             }
 
-            $estado = ($validoOri and $validoDes and $validoOri >= $saldo
-                and $banco_origen !== $banco_destino) ? 'exitosa' : 'rechazada';
-
-            $trans->setEstado($estado);
+            $estado = $trans->getEstado();
 
             $sql = "INSERT INTO transaccion
                       (origen, destino, banco_origen, banco_destino, saldo, estado, fecha)
