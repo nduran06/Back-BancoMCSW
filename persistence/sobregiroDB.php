@@ -72,7 +72,7 @@
             $state = $cuentaID->getState();
             $percent = $cuentaID->getPercent();
                         
-            $sql = "INSERT INTO usuario
+            $sql = "INSERT INTO sobregiro
                   (cuenta_id, estado, porcentaje)
                   VALUES
                   (:cuenta, :estado, :porcentaje)";
