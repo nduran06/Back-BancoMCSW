@@ -46,9 +46,7 @@
             $stmt->bindValue(':usuario', $usuario);
             $stmt->execute();
 
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            return $result;
+            return $stmt->fetch(PDO::FETCH_ASSOC);;
         }
 
         public function loginUser ($usuario, $passwd) {
@@ -63,6 +61,18 @@
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
             return $result;
+        }
+
+        public function getUserId($userDoc) {
+            $sql = "SELECT id FROM usuario WHERE documento=:userDoc";
+
+            $statement = $this->dbConn->prepare($sql);
+
+            $statement->bindValue(':userDoc', $userDoc);
+
+            $statement->execute();
+
+            return $statement->fetch(PDO::FETCH_ASSOC)['id'];
         }
 
         public function createUser($user){
@@ -87,7 +97,9 @@
 
             $statement->execute();
 
-            return $tipo;
+            $id=$this->getUserId($doc);
+
+            return ["id" => $id, "tipo" => $tipo];
         }
 
     }

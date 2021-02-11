@@ -38,9 +38,23 @@
             return $result;
         }
 
+        public function getAllUserSuccessTrans($numeroCuenta){
+
+            $sql = $this->dbConn->prepare("SELECT * FROM transaccion 
+                                            where origen=:origen or (destino =:origen and estado=:validEstado)");
+
+            $sql->bindValue(':origen', $numeroCuenta);
+            $sql->bindValue(':validEstado', "exitosa");
+
+            $sql->execute();
+            $sql->setFetchMode(PDO::FETCH_ASSOC);
+
+            return $sql;
+        }
+
         public function getAllUserTrans($numeroCuenta){
 
-            $sql = $this->dbConn->prepare("SELECT * FROM transaccion where origen =:origen");
+            $sql = $this->dbConn->prepare("SELECT * FROM transaccion where origen=:origen");
 
             $sql->bindValue(':origen', $numeroCuenta);
 
@@ -81,6 +95,12 @@
             return $result;
         }
 
+        private function string_curr_to_num($curr){
+            $stringSaldoCuenta = str_replace(str_split('$,'), '', $curr);
+
+            return floatval($stringSaldoCuenta);
+        }
+
         public function createTrans($trans){
 
             $origen = $trans->getOrigen();
@@ -88,23 +108,23 @@
             $banco_origen = $trans->getBancoOrigen();
             $banco_destino = $trans->getBancoDestino();
             $saldo = $trans->getSaldo();
-
             $fecha = $trans->getFecha();
+
 
             $validoOri = $this->getValidAccount($origen);
             $validoDes = $banco_origen === $banco_destino ?
                 $this->getValidAccount($destino) : $this->getValidAccountOtherBack($destino, $banco_destino);
 
-            echo($validoOri['saldo']);
-            echo($validoDes['saldo']);
+            $saldoValidoOri = $this->string_curr_to_num($validoOri['saldo']);
+            $saldoValidoDes = $this->string_curr_to_num($validoDes['saldo']);
+            $numSaldo = $this->string_curr_to_num($saldo);
 
-            $nuevoSaldoMenos = $validoOri['saldo'] - $saldo;
-            $nuevoSaldoMas = $validoDes['saldo'] + $saldo;
+            $nuevoSaldoMenos = $saldoValidoOri - $numSaldo;
+            $nuevoSaldoMas = $saldoValidoDes + $numSaldo;
 
-            echo($nuevoSaldoMenos);
-            echo($nuevoSaldoMas);
-            if($validoOri['saldo'] > 0 and $validoOri['saldo'] >= $saldo) {
-                $sqlOri = "UPDATE cuenta SET saldo=saldo-:nuevoSaldoMenos WHERE numero=:cuentaOrigen";
+
+            if($validoOri and $validoDes and $saldoValidoOri > 0 and $saldoValidoOri >= $numSaldo) {
+                $sqlOri = "UPDATE cuenta SET saldo=:nuevoSaldoMenos WHERE numero=:cuentaOrigen";
                 $statementOri = $this->dbConn->prepare($sqlOri);
                 $statementOri->bindValue(':nuevoSaldoMenos', $nuevoSaldoMenos);
                 $statementOri->bindValue(':cuentaOrigen', $origen);
@@ -118,16 +138,15 @@
                     $statementDes->execute();
                 }
 
+                $trans->setEstado('exitosa');
+
             }
 
             else {
-                $validoOri->false;
+                $trans->setEstado('rechazada');
             }
 
-            $estado = ($validoOri and $validoDes and $validoOri >= $saldo
-                and $banco_origen !== $banco_destino) ? 'exitosa' : 'rechazada';
-
-            $trans->setEstado($estado);
+            $estado = $trans->getEstado();
 
             $sql = "INSERT INTO transaccion
                       (origen, destino, banco_origen, banco_destino, saldo, estado, fecha)

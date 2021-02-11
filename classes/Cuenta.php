@@ -5,16 +5,17 @@
         private $_balance;
         private $_type;
         private $_state;
-        private $_userID;
-        private $_bancoID;
+        private $_idUsuario;
+        private $_idBanco;
 
-        function __construct($_number, $_balance, $_type, $_state, $_userID, $_bancoID ) {
+        function __construct($_number, $_balance, $_type, $_state, $_idUsuario, $_idBanco) {
             $this->_number = $_number;
             $this->_balance = $_balance;
             $this->_type = $_type;
             $this->_state = $_state;
-            $this->_userID = $_userID;
-            $this->_bancoID = $_bancoID;
+            $this->_idUsuario = $_idUsuario;
+            $this->_idBanco = $_idBanco;
+
         }
 
         public function getNumber(){
@@ -29,12 +30,6 @@
         public function getState(){
             return $this->_state;
         }
-        public function getUser(){
-            return $this->_userID;
-        }
-        public function getBanco(){
-            return $this->_bancoID;
-        }
 
         public function setNumber($number){
             $this->_number=$number;
@@ -48,12 +43,38 @@
         public function setState($state){
             $this->_state=$state;
         }
-        public function setType($userID){
-            $this->_userID=$userID;
+
+        /**
+         * @return mixed
+         */
+        public function getIdUsuario()
+        {
+            return $this->_idUsuario;
         }
-        public function setState($bancoID){
-            $this->_bancoID=$bancoID;
+
+        /**
+         * @param mixed $idUsuario
+         */
+        public function setIdUsuario($idUsuario)
+        {
+            $this->_idUsuario = $idUsuario;
         }
-        
+
+        /**
+         * @return mixed
+         */
+        public function getIdBanco()
+        {
+            return $this->_idBanco;
+        }
+
+        /**
+         * @param mixed $idBanco
+         */
+        public function setIdBanco($idBanco)
+        {
+            $this->_idBanco = $idBanco;
+        }
+
     }
 

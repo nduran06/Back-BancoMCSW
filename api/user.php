@@ -1,8 +1,10 @@
 <?php
 
 include('../classes/Usuario.php');
+include('../classes/Cuenta.php');
 include('../persistence/existedClientsDB.php');
 include('../persistence/userDB.php');
+include('../persistence/cuentaDB.php');
 include('../database/config.php');
 include('../database/utils.php');
 
@@ -51,16 +53,24 @@ if($page == 'clients') {
                 try {
                     header('HTTP/1.1 200 OK');
 
-                    $dbUser = new UserDB($db, $dbConn);;
+                    $dbUser = new UserDB($db, $dbConn);
+                    $dbCuenta = new CuentaDB($db, $dbConn);
                     $dbExisted = new ExistedClientsDB($db, $dbConn);
 
                     $responseExisted = $dbExisted->getExistedUser($_POST['documento']);
 
                     if($responseExisted != false) {
 
-                        $usuario = new Usuario($_POST['documento'], $_POST['nombre'], $_POST['usuario'],
+                        $usuario = new Usuario($_POST['documento'], $responseExisted['nombre'], $_POST['usuario'],
                             $_POST['passwd'], $_POST['tipo']);
+
                         $response = $dbUser->createUser($usuario);
+
+                        $cuentaOnline = new Account($responseExisted['num_cuenta'], $responseExisted['saldo'],
+                            $responseExisted['tipo'], 'activa', $response['id'], 1);
+
+
+                        $responseCuenta = $dbCuenta->createAccount($cuentaOnline);
 
                         echo json_encode($response, JSON_PRETTY_PRINT);
                     }
