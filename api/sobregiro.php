@@ -18,10 +18,13 @@ $action = end($link_array);
 $method = $_SERVER['REQUEST_METHOD'];
 header('Content-Type: application/JSON');
 
-// consulta si a cuenta esta creada
-  //  if ($action == 'consult') {
-    if (isset($_POST['consult'])) {
-        switch ($method) {
+
+if($page == 'overdraft') {
+    // Ver si la cuenta esta creada
+    // /user.php/overdraft/consult
+    if ($action == 'consult') {
+// consulta si la cuenta esta creada
+         switch ($method) {
             case 'POST':
                 try {
                     header('HTTP/1.1 200 OK');
@@ -43,8 +46,7 @@ header('Content-Type: application/JSON');
 
     // Crear sobregiro
 
-    //elseif ($action == 'add') {
-      elseif (isset($_POST['add'])) {
+    elseif ($action == 'add') {
         switch ($method) {
             case 'POST':
                 try {
@@ -94,4 +96,5 @@ header('Content-Type: application/JSON');
     else {
         header("HTTP/1.1 404 BAD REQUEST");
     }
+}
 
