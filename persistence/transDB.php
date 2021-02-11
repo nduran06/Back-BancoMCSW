@@ -81,6 +81,12 @@
             return $result;
         }
 
+        private function string_curr_to_num($curr){
+            $stringSaldoCuenta = str_replace(str_split('$,'), '', $curr);
+
+            return floatval($stringSaldoCuenta);
+        }
+
         public function createTrans($trans){
 
             $origen = $trans->getOrigen();

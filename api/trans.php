@@ -58,20 +58,20 @@ if($page == 'transaction') {
     // /user.php/clients/getALl
     elseif ($action == 'getAll'){
 
-        $db = new TransDB($db, $dbConn);
+        $dbTrans = new TransDB($db, $dbConn);
 
         switch ($method) {
 
             case 'POST':
                 $usuario = $_POST['usuario'];
 
-                $tipo = $db->getUserByUsername($usuario);
+                $tipo = $dbTrans->getUserByUsername($usuario);
 
                 if($tipo == 'auditor') {
 
                     try {
                         header('HTTP/1.1 200 OK');
-                        $response = $db->getUsers();
+                        $response = $dbTrans->getUsers();
 
                         echo json_encode($response->fetchAll(), JSON_PRETTY_PRINT);
                         exit();
