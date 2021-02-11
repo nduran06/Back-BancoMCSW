@@ -74,7 +74,7 @@ if($page == 'overdraft') {
                               $response = $dbSobre->createSobregiro($sobregiro);
 
                               echo json_encode($response, JSON_PRETTY_PRINT);
-                        }else echo'Esta cuenta ya tiene un sobregiro activo';
+                        }else  echo json_encode("Cuenta con sobrecupo activo", JSON_PRETTY_PRINT);
                     }
                     else{
                         header("HTTP/1.1 400 BAD REQUEST");
