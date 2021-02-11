@@ -54,10 +54,11 @@ if($page == 'transaction') {
         }
     }
 
-    // Obtener usuarios
+    // Obtener todos los usuarios
     // /user.php/clients/getALl
     elseif ($action == 'getAll'){
 
+        $dbUser = new UserDB($db, $dbConn);
         $dbTrans = new TransDB($db, $dbConn);
 
         switch ($method) {
@@ -65,13 +66,13 @@ if($page == 'transaction') {
             case 'POST':
                 $usuario = $_POST['usuario'];
 
-                $tipo = $dbTrans->getUserByUsername($usuario);
+                $tipo = $dbUser->getUserByUsername($usuario)["tipo"];
 
-                if($tipo == 'auditor') {
+                if(trim($tipo) === 'auditor') {
 
                     try {
                         header('HTTP/1.1 200 OK');
-                        $response = $dbTrans->getUsers();
+                        $response = $dbTrans->getAllTrans();
 
                         echo json_encode($response->fetchAll(), JSON_PRETTY_PRINT);
                         exit();
@@ -84,6 +85,76 @@ if($page == 'transaction') {
 
                 else{
                     header("HTTP/1.1 400 BAD REQUEST");
+                }
+
+                break;
+        }
+    }
+
+    /* Muestra todas las transacciones que ha hecho (exitosas y rechazadas) y las transacciones que ha recibido*/
+    elseif ($action == 'specific'){
+
+        $dbUser = new UserDB($db, $dbConn);
+        $dbTrans = new TransDB($db, $dbConn);
+
+        switch ($method) {
+
+            case 'POST':
+
+                $numeroCuenta = $_POST['cuenta'];
+
+                try {
+                    if($numeroCuenta) {
+                        header('HTTP/1.1 200 OK');
+                        $response = $dbTrans->getAllUserSuccessTrans($numeroCuenta);
+
+                        echo json_encode($response->fetchAll(), JSON_PRETTY_PRINT);
+                        exit();
+                    }
+
+                    else{
+                        header("HTTP/1.1 400 BAD REQUEST");
+                        echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
+                    }
+
+                } catch (exception $e) {
+                    header("HTTP/1.1 400 BAD REQUEST");
+                    echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
+                }
+
+                break;
+        }
+    }
+
+    /* Muestra todas las transacciones que ha hecho (exitosas y rechazadas)*/
+    elseif ($action == 'actions'){
+
+        $dbUser = new UserDB($db, $dbConn);
+        $dbTrans = new TransDB($db, $dbConn);
+
+        switch ($method) {
+
+            case 'POST':
+
+                $numeroCuenta = $_POST['cuenta'];
+
+                try {
+                    if($numeroCuenta) {
+                        header('HTTP/1.1 200 OK');
+                        $response = $dbTrans->getAllUserTrans($numeroCuenta);
+
+                        echo json_encode($response->fetchAll(), JSON_PRETTY_PRINT);
+                        exit();
+                    }
+
+                    else{
+                        header("HTTP/1.1 400 BAD REQUEST");
+                        echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
+                    }
+
+                } catch (exception $e) {
+                    header("HTTP/1.1 400 BAD REQUEST");
+                    echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
                 }
 
                 break;

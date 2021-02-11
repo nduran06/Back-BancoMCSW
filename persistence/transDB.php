@@ -38,15 +38,30 @@
             return $result;
         }
 
+        public function getAllUserSuccessTrans($numeroCuenta){
+
+            $sql = $this->dbConn->prepare("SELECT * FROM transaccion 
+                                            where origen=:origen or (destino =:origen and estado=:validEstado)");
+
+            $sql->bindValue(':origen', $numeroCuenta);
+            $sql->bindValue(':validEstado', "exitosa");
+
+            $sql->execute();
+            $sql->setFetchMode(PDO::FETCH_ASSOC);
+
+            return $sql;
+        }
+
         public function getAllUserTrans($numeroCuenta){
 
-            $sql = $this->dbConn->prepare("SELECT * FROM transaccion where origen =:origen");
+            $sql = $this->dbConn->prepare("SELECT * FROM transaccion where origen=:origen");
 
             $sql->bindValue(':origen', $numeroCuenta);
 
             $sql->execute();
+            $sql->setFetchMode(PDO::FETCH_ASSOC);
 
-            return $sql->setFetchMode(PDO::FETCH_ASSOC);
+            return $sql;
         }
 
         // retorna true o false
