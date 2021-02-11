@@ -67,12 +67,12 @@ if($page == 'clients') {
                         $response = $dbUser->createUser($usuario);
 
                         $cuentaOnline = new Account($responseExisted['num_cuenta'], $responseExisted['saldo'],
-                            $response['tipo'], 'activa', $response['id'], 1);
+                            $responseExisted['tipo'], 'activa', $response['id'], 1);
 
 
                         $responseCuenta = $dbCuenta->createAccount($cuentaOnline);
 
-                        echo json_encode($responseCuenta, JSON_PRETTY_PRINT);
+                        echo json_encode($response, JSON_PRETTY_PRINT);
                     }
                     else{
                         header("HTTP/1.1 400 BAD REQUEST");

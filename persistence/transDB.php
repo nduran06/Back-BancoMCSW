@@ -45,9 +45,8 @@
             $sql->bindValue(':origen', $numeroCuenta);
 
             $sql->execute();
-            $sql->setFetchMode(PDO::FETCH_ASSOC);
 
-            return $sql;
+            return $sql->setFetchMode(PDO::FETCH_ASSOC);
         }
 
         // retorna true o false
@@ -104,13 +103,34 @@
             echo($validoOri['saldo']);
             echo($validoDes['saldo']);
 
-            $nuevoSaldoMenos = $validoOri['saldo'] - $saldo;
-            $nuevoSaldoMas = $validoDes['saldo'] + $saldo;
+            $saldoValidoOri = $this->string_curr_to_num($validoOri['saldo']);
+            $saldoValidoDes = $this->string_curr_to_num($validoDes['saldo']);
+            $numSaldo = $this->string_curr_to_num($saldo);
+
+            $nuevoSaldoMenos = $saldoValidoOri - $numSaldo;
+            $nuevoSaldoMas = $saldoValidoDes + $numSaldo;
+
+            echo(".............................");
+
+            echo($saldoValidoOri);
+            echo(".............................");
+
+            echo($saldoValidoDes);
+            echo(".............................");
+
+            echo($numSaldo);
+            echo(".............................");
+
+            echo(".............................");
 
             echo($nuevoSaldoMenos);
+            echo(".............................");
+
             echo($nuevoSaldoMas);
-            if($validoOri['saldo'] > 0 and $validoOri['saldo'] >= $saldo) {
-                $sqlOri = "UPDATE cuenta SET saldo=saldo-:nuevoSaldoMenos WHERE numero=:cuentaOrigen";
+            echo(".............................");
+
+            if($saldoValidoOri > 0 and $saldoValidoOri >= $numSaldo) {
+                $sqlOri = "UPDATE cuenta SET saldo=:nuevoSaldoMenos WHERE numero=:cuentaOrigen";
                 $statementOri = $this->dbConn->prepare($sqlOri);
                 $statementOri->bindValue(':nuevoSaldoMenos', $nuevoSaldoMenos);
                 $statementOri->bindValue(':cuentaOrigen', $origen);

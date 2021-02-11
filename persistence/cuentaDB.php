@@ -27,14 +27,6 @@ $response['tipo'], 'activa', $response['id'], 1);*/
         $id_prop = $cuenta->getIdUsuario();
         $id_banco = $cuenta->getIdBanco();
 
-        echo $num_cuenta;
-        echo $tipo;
-        echo $saldo;
-        echo $estado;
-        echo $id_prop;
-        echo $id_banco;
-
-
 
         $sql = "INSERT INTO cuenta
                   (numero, tipo, saldo, estado, id_usuario, id_banco)
@@ -52,7 +44,7 @@ $response['tipo'], 'activa', $response['id'], 1);*/
 
         $statement->execute();
 
-        return $cuenta;
+        return $sql->setFetchMode(PDO::FETCH_ASSOC);
     }
 
 }
