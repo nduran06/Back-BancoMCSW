@@ -37,7 +37,7 @@
 
             return $result;
         }
-      
+
          public function getSobregiroById($id){
 
             $sql = "SELECT * FROM sobregiro WHERE id=:id";
@@ -64,14 +64,13 @@
             return $result;
         }
 
-   
-        public function createSobregiro($cuentaID){
 
-          
-            $cuentaExistID = $cuentaID->getCuentaExistID();
-            $state = $cuentaID->getState();
-            $percent = $cuentaID->getPercent();
-                        
+        public function createSobregiro($sobregiro){
+
+            $cuentaExistID = $sobregiro->getCuentaExistID();
+            $state = $sobregiro->getState();
+            $percent = $sobregiro->getPercent();
+
             $sql = "INSERT INTO sobregiro
                   (cuenta_id, estado, porcentaje)
                   VALUES
@@ -84,7 +83,7 @@
 
             $statement->execute();
 
-            return $percent;
+            return $sobregiro;
         }
 
     }
