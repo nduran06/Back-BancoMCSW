@@ -44,7 +44,7 @@ if($page == 'transaction') {
                 }
                 catch (exception $e) {
                     header("HTTP/1.1 400 BAD REQUEST");
-                    echo json_encode($e, JSON_PRETTY_PRINT);
+                    echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
                 }
                 break;
 
