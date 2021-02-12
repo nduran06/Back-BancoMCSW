@@ -16,8 +16,6 @@ class CuentaDB {
         }
     }
 
-    /*new Cuenta($responseExisted['num_cuenta'], $responseExisted['saldo'],
-$response['tipo'], 'activa', $response['id'], 1);*/
     public function createAccount($cuenta) {
 
         $num_cuenta = $cuenta->getNumber();

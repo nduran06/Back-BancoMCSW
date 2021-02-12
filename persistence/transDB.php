@@ -1,5 +1,9 @@
 <?php
 
+include('cuentaDB.php');
+include('externalEntDB.php');
+
+
     class TransDB {
 
         private $db;
@@ -123,22 +127,25 @@
             $nuevoSaldoMas = $saldoValidoDes + $numSaldo;
 
 
-            if($validoOri and $validoDes and $saldoValidoOri > 0 and $saldoValidoOri >= $numSaldo) {
-                $sqlOri = "UPDATE cuenta SET saldo=:nuevoSaldoMenos WHERE numero=:cuentaOrigen";
-                $statementOri = $this->dbConn->prepare($sqlOri);
-                $statementOri->bindValue(':nuevoSaldoMenos', $nuevoSaldoMenos);
-                $statementOri->bindValue(':cuentaOrigen', $origen);
-                $statementOri->execute();
+            if($origen !== $destino and $validoOri and $validoDes and $saldoValidoOri > 0 and $saldoValidoOri >= $numSaldo) {
 
-                if( $banco_origen === $banco_destino) {
-                    $sqlDes = "UPDATE cuenta SET saldo=:nuevoSaldoMas WHERE numero=:cuentaDestino";
-                    $statementDes = $this->dbConn->prepare($sqlDes);
-                    $statementDes->bindValue(':nuevoSaldoMas', $nuevoSaldoMas);
-                    $statementDes->bindValue(':cuentaDestino', $destino);
-                    $statementDes->execute();
+                $dbCuenta = new CuentaDB($this->db, $this->dbConn);
+
+                $oriAns = $dbCuenta->updateBalance($origen, $nuevoSaldoMenos);
+                $trans->setEstado($oriAns ? 'exitosa' : 'rechazada');
+
+                if ($banco_origen === $banco_destino) {
+
+                    $desAns = $dbCuenta->updateBalance($destino, $nuevoSaldoMas);
+                    $trans->setEstado($desAns ? 'exitosa' : 'rechazada');
+
+                } else {
+
+                    $dbCuentaExterna = new ExternalEntDB($this->db, $this->dbConn);
+
+                    $desAns = $dbCuentaExterna->updateBalance($destino, $nuevoSaldoMas, $banco_destino);
+                    $trans->setEstado($desAns ? 'exitosa' : 'rechazada');
                 }
-
-                $trans->setEstado('exitosa');
 
             }
 

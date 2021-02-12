@@ -7,7 +7,7 @@ class Sobregiro {
        
 
         function __construct($_cuentaID, $_state, $_percent ) {
-            $this->_cuentaExistID = $_cuentaExistID;
+            $this->_cuentaExistID = $_cuentaID;
             $this->_state = $_state;
             $this->_percent = $_percent;
            
