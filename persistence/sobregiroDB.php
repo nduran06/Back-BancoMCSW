@@ -25,7 +25,7 @@
             return $sql;
         }
 
-        public function getSobregiroByAccount($cuentaID){
+        public function getSobregirosByAccount($cuentaID){
 
             $sql = "SELECT * FROM sobregiro WHERE cuenta_id=:id";
 
@@ -33,9 +33,9 @@
             $stmt->bindValue(':id', $cuentaID);
             $stmt->execute();
 
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
-            return $result;
+            return $stmt;
         }
       
          public function getSobregiroById($id){
@@ -65,26 +65,27 @@
         }
 
    
-        public function createSobregiro($cuentaID){
+        public function createSobregiro($sobregiro){
 
-          
-            $cuentaExistID = $cuentaID->getCuentaExistID();
-            $state = $cuentaID->getState();
-            $percent = $cuentaID->getPercent();
+            $cuentaExistID = $sobregiro->getCuentaExistID();
+            $state = $sobregiro->getState();
+            $percent = $sobregiro->getPercent();
+            $saldo = $sobregiro->getSaldo();
                         
-            $sql = "INSERT INTO usuario
-                  (cuenta_id, estado, porcentaje)
+            $sql = "INSERT INTO sobregiro
+                  (cuenta_id, estado, porcentaje, saldo)
                   VALUES
-                  (:cuenta, :estado, :porcentaje)";
+                  (:cuenta, :estado, :porcentaje, :saldo)";
             $statement = $this->dbConn->prepare($sql);
 
             $statement->bindValue(':cuenta', $cuentaExistID);
             $statement->bindValue(':estado', $state);
             $statement->bindValue(':porcentaje', $percent);
+            $statement->bindValue(':saldo', $saldo);
 
             $statement->execute();
 
-            return $percent;
+            return $sobregiro->toArray();
         }
 
     }

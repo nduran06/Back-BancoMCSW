@@ -16,6 +16,16 @@ class CuentaDB {
         }
     }
 
+    public function getAccount($cuenta) {
+        $sql = "SELECT * FROM cuenta WHERE numero=:cuenta";
+
+        $statement = $this->dbConn->prepare($sql);
+        $statement->bindValue(':cuenta', $cuenta);
+        $statement->execute();
+
+        return $statement->fetch(PDO::FETCH_ASSOC);
+
+    }
     public function createAccount($cuenta) {
 
         $num_cuenta = $cuenta->getNumber();

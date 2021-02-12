@@ -1,13 +1,16 @@
 <?php
 
 include('../classes/sobregiro.php');
-include('../persistence/existedClientsDB.php');
+include('../persistence/cuentaDB.php');
 include('../persistence/sobregiroDB.php');
 include('../database/config.php');
 include('../database/utils.php');
 
 $db = dbInfo();
 $dbConn =  connect($db);
+
+$dbSobregiro = new SobregiroDB($db, $dbConn);
+$dbCuenta = new CuentaDB($db, $dbConn);
 
 $link = $_SERVER['PHP_SELF'];
 $link_array = explode('/',$link);
@@ -19,15 +22,19 @@ $method = $_SERVER['REQUEST_METHOD'];
 header('Content-Type: application/JSON');
 
 // consulta si a cuenta esta creada
+
+if($page == 'clients') {
     if ($action == 'consult') {
         switch ($method) {
             case 'POST':
                 try {
                     header('HTTP/1.1 200 OK');
-                    $dbExistedClients = new ExistedClientsDB($db, $dbConn);
-                    $newAccount = $_POST['newAccount'];
-                    $response = $dbExistedClients->getExistedAccount($newAccount);
-                    echo json_encode($response, JSON_PRETTY_PRINT);
+
+                    $account = $_POST['num_cuenta'];
+                    $response =  $dbSobregiro -> getSobregirosByAccount($account);
+
+                    echo json_encode($response->fetchAll(), JSON_PRETTY_PRINT);
+
                 } catch (exception $e) {
                     header("HTTP/1.1 400 BAD REQUEST");
                     echo json_encode("Cuenta no encontrada", JSON_PRETTY_PRINT);
@@ -38,34 +45,29 @@ header('Content-Type: application/JSON');
                 echo 'METODO NO SOPORTADO';
                 break;
         }
-    }
+    } // Crear sobregiro
 
-    // Crear sobregiro
-    
     elseif ($action == 'add') {
         switch ($method) {
             case 'POST':
                 try {
                     header('HTTP/1.1 200 OK');
 
-                    $dbUser = new UserDB($db, $dbConn);;
-                    $dbExisted = new ExistedClientsDB($db, $dbConn);
+                    $numCuenta = $_POST['num_cuenta'];
+                    $saldo = $_POST['saldo'];
 
-                    $responseExisted = $dbExisted->getExistedAccount($_POST['$newAccount']);
-                    
-                    if($responseExisted != false) {
-                      
-                        $responseExistedSobregiro = $dbExisted-> getSobregiroByAccount($_POST['$newAccount']);
-                      
-                        if($responseExistedSobregiro != true) {
-                          
-                              $sobregiro = new Sobregiro($_POST['$newAccount'], $_POST['stateSobregiro'], $_POST['percent']);
-                              $response = $dbUser->createSobregiro($sobregiro);
+                    $date = new DateTime();
 
-                              echo json_encode($response, JSON_PRETTY_PRINT);
-                        }
+                    $cuentaValid = $dbCuenta->getAccount($numCuenta);
+
+                    if($cuentaValid){
+                        $sobregiro = new Sobregiro($numCuenta, 'en proceso', '0', $saldo, $date->format('Y-m-d H:i:s'));
+
+                        $response = $dbSobregiro->createSobregiro($sobregiro);
+                        echo json_encode($response, JSON_PRETTY_PRINT);
                     }
-                    else{
+
+                    else {
                         header("HTTP/1.1 400 BAD REQUEST");
                         echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
                     }
@@ -80,10 +82,8 @@ header('Content-Type: application/JSON');
                 echo 'METODO NO SOPORTADO';
                 break;
         }
-    }
-
-    else {
+    } else {
         header("HTTP/1.1 404 BAD REQUEST");
     }
-
+}
 
