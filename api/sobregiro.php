@@ -92,7 +92,7 @@ elseif($page == 'overdraft') {
     // /user.php/overdraft/consult
     if ($action == 'consult') {
 
-// consulta si hay sobregiros pendientes por definir (administrador)
+        // consulta si hay sobregiros pendientes por definir (administrador)
         switch ($method) {
             case 'POST':
                 try {
@@ -102,6 +102,32 @@ elseif($page == 'overdraft') {
                     $response = $dbExistedClients->getSobregiroByState($state);
                     echo json_encode($response, JSON_PRETTY_PRINT);
                 } catch (exception $e) {
+                    header("HTTP/1.1 400 BAD REQUEST");
+                    echo json_encode("Cuenta no encontrada", JSON_PRETTY_PRINT);
+                }
+                break;
+
+            default://metodo NO soportado
+                echo 'METODO NO SOPORTADO';
+                break;
+        }
+    }
+
+    elseif ($action == 'update') {
+
+        switch ($method) {
+            case 'POST':
+                try {
+                    header('HTTP/1.1 200 OK');
+
+                    $sobregiroId = $_POST['id'];
+                    $sobregiroState = $_POST['estado'];
+
+                    $response = $dbSobregiro -> updateSobregiroState($sobregiroId, $sobregiroState);
+                    echo json_encode($response, JSON_PRETTY_PRINT);
+                }
+
+                catch (exception $e) {
                     header("HTTP/1.1 400 BAD REQUEST");
                     echo json_encode("Cuenta no encontrada", JSON_PRETTY_PRINT);
                 }
