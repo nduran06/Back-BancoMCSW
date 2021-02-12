@@ -1,7 +1,7 @@
 <?php
 
 include('../classes/sobregiro.php');
-include('../persistence/existedClientsDB.php');
+include('../persistence/cuentaDB.php');
 include('../persistence/sobregiroDB.php');
 include('../database/config.php');
 include('../database/utils.php');
@@ -20,10 +20,11 @@ header('Content-Type: application/JSON');
 
 
 if($page == 'overdraft') {
-    // Ver si la cuenta esta creada
+    
     // /user.php/overdraft/consult
     if ($action == 'consult') {
-// consulta si hay sobregiros pendientes por definir (solo administrador)
+        
+// consulta si hay sobregiros pendientes por definir (administrador)
          switch ($method) {
             case 'POST':
                 try {
@@ -44,8 +45,7 @@ if($page == 'overdraft') {
         }
     }
 
-    // Crear sobregiro
-
+    // Defino un sobregiro si está pendientes (Administrador)
     elseif ($action == 'add') {
         switch ($method) {
             case 'POST':
@@ -60,12 +60,12 @@ if($page == 'overdraft') {
                     $stateSobregiro = $_POST['stateSobregiro'];
                     $percent = $_POST['percent'];
 
-                    $responseExisted = $dbExisted->getSobregiroByAccount($newAccount);
+                    $responseExisted = $dbExisted->getSobregiroByAccount($newAccount); //valido si hay solicitud de la cuenta
 
                     if($responseExisted != false) {
 
                        $state='Pendiente';
-                        $responseExistedPend = $dbSobre->getSobregiroByAccount_State($newAccount, $state);
+                        $responseExistedPend = $dbSobre->getSobregiroByAccount_State($newAccount, $state); //valido si el estado de esa solicitud está pendiente 
 
                         if($responseExistedPend != false) {
 
@@ -91,6 +91,8 @@ if($page == 'overdraft') {
                 echo 'METODO NO SOPORTADO';
                 break;
         }
+        
+        //hago la solicitud del sobrecupo (Usuario)
     }elseif ($action == 'request') {
     switch ($method) {
           case 'POST':
@@ -105,18 +107,18 @@ if($page == 'overdraft') {
                   $stateSobregiro = 'Pendiente';
                   $percent = null;
 
-                  $responseExisted = $dbExisted->getAccountCreated($newAccount);
+                  $responseExisted = $dbExisted->getAccountCreated($newAccount);   //valido si la cuentaesta creada en la app
 
                   if($responseExisted != false) {
 
 
-                      $responseExistedSob = $dbSobre->getSobregiroByAccount($newAccount);
+                      $responseExistedSob = $dbSobre->getSobregiroByAccount($newAccount); //valido si ya se izo la solicitud del sobrecupo
 
                       if($responseExistedSob != true) {
 
                             $sobregiro = new Sobregiro($newAccount, $stateSobregiro, $percent);
 
-                            $response = $dbSobre->createSobregiro($sobregiro);
+                            $response = $dbSobre->createSobregiro($sobregiro);   //reo la solicitud del sobrecupo
 
                             echo json_encode($response, JSON_PRETTY_PRINT);
                       } else echo 'Esta cuenta ya tiene un sobregiro activo';
