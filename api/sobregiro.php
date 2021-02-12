@@ -175,7 +175,7 @@ elseif($page == 'overdraft') {
                     $stateSobregiro = 'Pendiente';
                     $percent = null;
 
-                    $responseExisted = $dbExisted->getAccountCreated($newAccount);   //valido si la cuentaesta creada en la app
+                    $responseExisted = $dbExisted->getAccount($newAccount);   //valido si la cuentaesta creada en la app
 
                     if($responseExisted != false) {
 
