@@ -51,7 +51,7 @@
             return $result;
         }
 
-        public function getUserByState($state){
+        public function getSobregiroByState($state){
 
             $sql = "SELECT * FROM sobregiro WHERE estado=:state";
 
@@ -64,6 +64,39 @@
             return $result;
         }
 
+        public function getSobregiroByAccount_State($newAccount, $state){
+
+            $sql = "SELECT * FROM sobregiro WHERE cuenta_id=:acc and estado=:state";
+
+            $stmt = $this->dbConn->prepare($sql);
+            $stmt->bindValue(':state', $state);
+            $stmt->bindValue(':acc', $newAccount);
+            $stmt->execute();
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $result;
+        }
+
+
+public function updateSobregiro($sobregiro){
+
+    $cuentaExistID = $sobregiro->getCuentaExistID();
+    $state = $sobregiro->getState();
+    $percent = $sobregiro->getPercent();
+
+
+    $sql = "UPDATE sobregiro SET estado=:estado , porcentaje=:porcentaje WHERE cuenta_id=:cuenta";
+    $statement = $this->dbConn->prepare($sql);
+
+    $statement->bindValue(':cuenta', $cuentaExistID);
+    $statement->bindValue(':estado', $state);
+    $statement->bindValue(':porcentaje', $percent);
+
+    $statement->execute();
+
+    return $sobregiro;
+}
 
         public function createSobregiro($sobregiro){
 
