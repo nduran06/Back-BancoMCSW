@@ -55,18 +55,8 @@ class CuentaDB {
         return $sql->setFetchMode(PDO::FETCH_ASSOC);
     }
     
-    public function getAccountCreated($cuentaID){
-
-        $sql = "SELECT * FROM cuenta WHERE numero=:id";
-
-        $stmt = $this->dbConn->prepare($sql);
-        $stmt->bindValue(':id', $cuentaID);
-        $stmt->execute();
-
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return $result;
-    }
+    
+    
 
     public function getAccountBalance($cuenta) {
 
