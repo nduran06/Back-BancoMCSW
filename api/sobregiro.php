@@ -100,7 +100,7 @@ elseif($page == 'overdraft') {
                     $dbExistedClients = new SobregiroDB($db, $dbConn);
                     $state=$_POST['state'];
                     $response = $dbExistedClients->getSobregiroByState($state);
-                    echo json_encode($response, JSON_PRETTY_PRINT);
+                    echo json_encode($response->fetchAll(), JSON_PRETTY_PRINT);
                 } catch (exception $e) {
                     header("HTTP/1.1 400 BAD REQUEST");
                     echo json_encode("Cuenta no encontrada", JSON_PRETTY_PRINT);
