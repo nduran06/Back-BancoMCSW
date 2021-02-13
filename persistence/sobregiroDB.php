@@ -59,9 +59,9 @@
             $stmt->bindValue(':state', $state);
             $stmt->execute();
 
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
-            return $result;
+            return $stmt;
         }
 
         public function getSobregiroByAccount_State($newAccount, $state){
