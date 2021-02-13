@@ -17,7 +17,10 @@ $action = end($link_array);
 
 
 $method = $_SERVER['REQUEST_METHOD'];
-header('Content-Type: application/JSON');
+header('Access-Control-Allow-Origin: *');
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+header("Access-Control-Allow-Headers: Content-Disposition, Content-Type, Content-Length, Accept-Encoding");
+header("Content-type:application/json");
 
 if($page == 'transaction') {
 
