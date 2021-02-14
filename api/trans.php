@@ -15,6 +15,7 @@ $link_array = explode('/',$link);
 $page = $link_array[count($link_array)-2];
 $action = end($link_array);
 
+$dbCuenta = new CuentaDB($db, $dbConn);
 
 $method = $_SERVER['REQUEST_METHOD'];
 header('Access-Control-Allow-Origin: *');
@@ -104,7 +105,9 @@ if($page == 'transaction') {
 
             case 'POST':
 
-                $numeroCuenta = $_POST['cuenta'];
+                $usuario = $_POST['usuario'];
+                $userId = $dbUser->getUserIdByUsername($usuario)["id"];
+                $numeroCuenta = trim($dbCuenta->getAccountByUserId($userId)["numero"]);
 
                 try {
                     if($numeroCuenta) {
@@ -138,8 +141,9 @@ if($page == 'transaction') {
         switch ($method) {
 
             case 'POST':
-
-                $numeroCuenta = $_POST['cuenta'];
+                $usuario = $_POST['usuario'];
+                $userId = $dbUser->getUserIdByUsername($usuario)["id"];
+                $numeroCuenta = trim($dbCuenta->getAccountByUserId($userId)["numero"]);
 
                 try {
                     if($numeroCuenta) {

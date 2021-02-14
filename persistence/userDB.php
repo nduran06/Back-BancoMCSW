@@ -63,16 +63,16 @@
             return $result;
         }
 
-        public function getUserId($userDoc) {
-            $sql = "SELECT id FROM usuario WHERE documento=:userDoc";
+        public function getUserIdByUsername($usuario) {
+            $sql = "SELECT id FROM usuario WHERE usuario=:usuario";
 
             $statement = $this->dbConn->prepare($sql);
 
-            $statement->bindValue(':userDoc', $userDoc);
+            $statement->bindValue(':usuario', $usuario);
 
             $statement->execute();
 
-            return $statement->fetch(PDO::FETCH_ASSOC)['id'];
+            return $statement->fetch(PDO::FETCH_ASSOC);
         }
 
         public function createUser($user){

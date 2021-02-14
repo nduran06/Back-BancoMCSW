@@ -52,6 +52,27 @@ if($page == 'clients') {
         }
     }
 
+    elseif ($action == 'getAccount') {
+        switch ($method) {
+            case 'POST':
+                try {
+                    header('HTTP/1.1 200 OK');
+                    $usuario = $_POST['usuario'];
+                    $userId = $dbUser->getUserIdByUsername($usuario)["id"];
+                    $response = $dbCuenta->getAccountByUserId($userId);
+                    echo json_encode($response["numero"], JSON_PRETTY_PRINT);
+                } catch (exception $e) {
+                    header("HTTP/1.1 400 BAD REQUEST");
+                    echo json_encode("Cuenta no encontrada", JSON_PRETTY_PRINT);
+                }
+                break;
+
+            default://metodo NO soportado
+                echo 'METODO NO SOPORTADO';
+                break;
+        }
+    }
+
     // Crear usuario
     // /user.php/clients/add
     elseif ($action == 'add') {
@@ -61,28 +82,41 @@ if($page == 'clients') {
                     header('HTTP/1.1 200 OK');
 
                     $responseExisted = $dbExistedClients->getExistedUser($_POST['documento']);
+                    echo json_encode($_POST, JSON_PRETTY_PRINT);
+                    if($_POST['tipo'] === "cliente") {
 
-                    if($responseExisted != false) {
+                        if ($responseExisted !== false) {
 
-                        $usuario = new Usuario($_POST['documento'], $responseExisted['nombre'], $_POST['usuario'],
+                            $usuario = new Usuario($_POST['documento'], $responseExisted['nombre'], $_POST['usuario'],
+                                $_POST['passwd'], $_POST['tipo']);
+
+                            $response = $dbUser->createUser($usuario);
+
+
+                            $cuentaOnline = new Account($responseExisted['num_cuenta'], $responseExisted['saldo'],
+                                $responseExisted['tipo'], 'activa', $response['id'], 1);
+
+                            $responseCuenta = $dbCuenta->createAccount($cuentaOnline);
+
+                            echo json_encode($response, JSON_PRETTY_PRINT);
+                        } else {
+                            header("HTTP/1.1 400 BAD REQUEST");
+                            echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
+                        }
+                    }
+
+                    if($_POST['tipo'] === "admin" or $_POST['tipo'] === "auditor") {
+
+                        $usuario = new Usuario($_POST['documento'], $_POST['nombre'], $_POST['usuario'],
                             $_POST['passwd'], $_POST['tipo']);
 
                         $response = $dbUser->createUser($usuario);
-
-                        $cuentaOnline = new Account($responseExisted['num_cuenta'], $responseExisted['saldo'],
-                            $responseExisted['tipo'], 'activa', $response['id'], 1);
-
-
-                        $responseCuenta = $dbCuenta->createAccount($cuentaOnline);
-
                         echo json_encode($response, JSON_PRETTY_PRINT);
                     }
-                    else{
-                        header("HTTP/1.1 400 BAD REQUEST");
-                        echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
-                    }
 
-                } catch (exception $e) {
+                }
+
+                catch (exception $e) {
                     header("HTTP/1.1 400 BAD REQUEST");
                     echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
                 }

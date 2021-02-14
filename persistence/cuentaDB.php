@@ -26,6 +26,18 @@ class CuentaDB {
         return $statement->fetch(PDO::FETCH_ASSOC);
 
     }
+
+    public function getAccountByUserId($userId) {
+        $sql = "SELECT numero FROM cuenta WHERE id_usuario=:userId";
+
+        $statement = $this->dbConn->prepare($sql);
+        $statement->bindValue(':userId', $userId);
+        $statement->execute();
+
+        return $statement->fetch(PDO::FETCH_ASSOC);
+
+    }
+
     public function createAccount($cuenta) {
 
         $num_cuenta = $cuenta->getNumber();
@@ -52,7 +64,7 @@ class CuentaDB {
 
         $statement->execute();
 
-        return $sql->setFetchMode(PDO::FETCH_ASSOC);
+        return $statement->setFetchMode(PDO::FETCH_ASSOC);
     }
     
     
