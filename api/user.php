@@ -138,7 +138,7 @@ if($page == 'clients') {
                     if($responseBalance !== false) {
                         header('HTTP/1.1 200 OK');
 
-                        echo json_encode($responseBalance, JSON_PRETTY_PRINT);
+                        echo json_encode($responseBalance["saldo"], JSON_PRETTY_PRINT);
                     }
                     else{
                         header("HTTP/1.1 400 BAD REQUEST");
