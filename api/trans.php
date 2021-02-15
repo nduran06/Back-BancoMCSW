@@ -40,8 +40,6 @@ if($page == 'transaction') {
                     $trans = new Transaccion($_POST['origen'], $_POST['destino'], "MIBANCO",
                         $_POST['banco_destino'], $_POST['saldo'], "en proceso", $date->format('Y-m-d H:i:s'));
 
-                    echo json_encode($trans->getBancoOrigen(), JSON_PRETTY_PRINT);
-
                     $response = $dbTrans->createTrans($trans);
 
                     echo json_encode($response, JSON_PRETTY_PRINT);
@@ -58,8 +56,8 @@ if($page == 'transaction') {
         }
     }
 
-    // Obtener todos los usuarios
-    // /user.php/clients/getALl
+    // Obtener todas las transacciones
+    // /trans.php/transaction/getAll
     elseif ($action == 'getAll'){
 
         $dbUser = new UserDB($db, $dbConn);
@@ -72,7 +70,7 @@ if($page == 'transaction') {
 
                 $tipo = $dbUser->getUserByUsername($usuario)["tipo"];
 
-                if(trim($tipo) === 'auditor') {
+                if(trim($tipo) === 'auditor' or trim($tipo) === 'admin') {
 
                     try {
                         header('HTTP/1.1 200 OK');

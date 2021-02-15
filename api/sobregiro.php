@@ -3,6 +3,7 @@
 include('../classes/sobregiro.php');
 include('../persistence/cuentaDB.php');
 include('../persistence/sobregiroDB.php');
+include('../persistence/userDB.php');
 include('../database/config.php');
 include('../database/utils.php');
 
@@ -11,6 +12,7 @@ $dbConn =  connect($db);
 
 $dbSobregiro = new SobregiroDB($db, $dbConn);
 $dbCuenta = new CuentaDB($db, $dbConn);
+$dbUser = new UserDB($db, $dbConn);
 
 $link = $_SERVER['PHP_SELF'];
 $link_array = explode('/',$link);
@@ -112,6 +114,38 @@ elseif($page == 'overdraft') {
 
             default://metodo NO soportado
                 echo 'METODO NO SOPORTADO';
+                break;
+        }
+    }
+
+    elseif ($action == 'getAll'){
+
+        switch ($method) {
+
+            case 'POST':
+                $usuario = $_POST['usuario'];
+
+                $tipo = $dbUser->getUserByUsername($usuario)["tipo"];
+
+                if(trim($tipo) === 'auditor' or trim($tipo) === 'admin') {
+
+                    try {
+                        header('HTTP/1.1 200 OK');
+                        $response = $dbSobregiro->getSobregiros();
+
+                        echo json_encode($response->fetchAll(), JSON_PRETTY_PRINT);
+                        exit();
+
+                    } catch (exception $e) {
+                        header("HTTP/1.1 400 BAD REQUEST");
+                        echo json_encode("datos inválidos", JSON_PRETTY_PRINT);
+                    }
+                }
+
+                else{
+                    header("HTTP/1.1 400 BAD REQUEST");
+                }
+
                 break;
         }
     }
