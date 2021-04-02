@@ -94,7 +94,7 @@ if($page == 'clients') {
 
 elseif($page == 'overdraft') {
 
-    // /user.php/overdraft/consult
+    // /UserController.php/overdraft/consult
     if ($action == 'consult') {
 
         // consulta si hay sobregiros pendientes por definir (administrador)

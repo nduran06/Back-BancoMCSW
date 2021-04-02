@@ -49,6 +49,17 @@
             return $stmt->fetch(PDO::FETCH_ASSOC);
         }
 
+        public function getIdByDoc($doc){
+
+            $sql = "SELECT id FROM usuario WHERE documento=:doc";
+
+            $stmt = $this->dbConn->prepare($sql);
+            $stmt->bindValue(':doc', $doc);
+            $stmt->execute();
+
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+
         public function loginUser ($usuario, $passwd) {
 
             $sql = "SELECT tipo FROM usuario WHERE usuario=:usuario AND passwd=:passwd";
@@ -97,7 +108,7 @@
 
             $statement->execute();
 
-            $id=$this->getUserId($doc);
+            $id=$this->getIdByDoc($doc)["id"];
 
             return ["id" => $id, "tipo" => $tipo];
         }
