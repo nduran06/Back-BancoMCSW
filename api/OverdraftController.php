@@ -82,12 +82,19 @@ class OverdraftController {
      * @return Retorna una lista con los sobregiros; si se produce una excepción retorna false
      *
      */
-    public function getAllOverdrafts(){
+    public function getAllOverdrafts($usuario){
 
         try {
-            $response = $this->dbSobregiro->getSobregiros();
-            return $response->fetchAll();
+            $rolesValidos = array("auditor", "admin");
 
+            $user = $this->dbUser->getUserByUsername($usuario);
+
+            if(in_array(trim($user["tipo"]), $rolesValidos)) {
+                return $this->dbSobregiro->getSobregiros()->fetchAll();
+            }
+            else{
+                return false;
+            }
         }
 
         catch (exception $e) {
@@ -100,33 +107,43 @@ class OverdraftController {
      *
      * @param $idSobregiro Id del sobregiro
      * @param $estadoSobregiro Estado del sobregiro
-     * @param $porcentaje
+     * @param $porcentaje Porcentaje de aprobación
      * @return Retorna true si la actualización del estado se realizó correctamente; de lo contrario (o si se produce una excepción) retorna false
      */
-    public function updateOverdraft($idSobregiro, $estadoSobregiro, $porcentaje){
+    public function updateOverdraft($idSobregiro, $estadoSobregiro, $porcentaje, $usuario){
 
         try {
 
-            $estadosValidos = array("en proceso", "aprobado", "rechazado");
+            $rolesValidos = array("auditor", "admin");
 
-            $realPerc = 100;
+            $user = $this->dbUser->getUserByUsername($usuario);
 
-            if(in_array($estadoSobregiro, $estadosValidos)){
+            if(in_array(trim($user["tipo"]), $rolesValidos)) {
 
-                if($estadoSobregiro === "aprobado"){
-                    $realPerc = $porcentaje;
-                }
+                $estadosValidos = array("en proceso", "aprobado", "rechazado");
 
-                if($realPerc > 0 and $realPerc <= 100) {
+                $realPerc = 100;
 
-                    if($estadoSobregiro === "en proceso"){
-                        $realPerc = 0;
+                if(in_array($estadoSobregiro, $estadosValidos)){
+
+                    if($estadoSobregiro === "aprobado"){
+                        $realPerc = $porcentaje;
                     }
 
-                    return $this->dbSobregiro -> updateSobregiroState($idSobregiro, $estadoSobregiro, $realPerc);
+                    if($realPerc > 0 and $realPerc <= 100) {
+
+                        if($estadoSobregiro === "en proceso"){
+                            $realPerc = 0;
+                        }
+
+                        return $this->dbSobregiro -> updateSobregiroState($idSobregiro, $estadoSobregiro, $realPerc);
+                    }
+                }
+
+                else {
+                    return false;
                 }
             }
-
             else {
                 return false;
             }

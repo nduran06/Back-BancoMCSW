@@ -19,31 +19,14 @@ header("Access-Control-Allow-Methods: OPTIONS,GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-/*$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$requestMethod = $_SERVER["REQUEST_METHOD"];
-$uriParts = explode( '/', $uri );
 
-// define all valid endpoints - this will act as a simple router
-$routes = [
-    'customers' => [
-        'method' => 'GET',
-        'expression' => '/^\/customers\/?$/',
-        'controller_method' => 'index'
-    ],
-    'customers.create' => [
-        'method' => 'POST',
-        'expression' => '/^\/customers\/?$/',
-        'controller_method' => 'store'
-    ],
-    'customers.charge' => [
-        'method' => 'POST',
-        'expression' => '/^\/customers\/(\d+)\/charges\/?$/',
-        'controller_method' => 'charge'
-    ]
-];*/
+/* Manejo de rutas */
 
 $klein = new Klein();
 
+/**
+ * /MiBanco
+ */
 $klein->with('/MiBanco', function () use ($klein) {
 
     /**
@@ -70,7 +53,9 @@ $klein->with('/MiBanco', function () use ($klein) {
                 ];
 
                 echo json_encode($ans, JSON_PRETTY_PRINT);
-            } else {
+            }
+
+            else {
                 header("HTTP/1.1 401 Unauthorized");
                 echo json_encode(null, JSON_PRETTY_PRINT);
             }
@@ -79,7 +64,9 @@ $klein->with('/MiBanco', function () use ($klein) {
             echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
         }
 
-        exit();
+        finally {
+            exit();
+        }
     });
 
     /**
@@ -91,23 +78,32 @@ $klein->with('/MiBanco', function () use ($klein) {
      */
     $klein->respond('POST', '/validator/user', function ($request, $response) {
 
-        try {
-            $userController = new UserController();
-            $existedUser = $userController->validUser($_POST['documento']);
+        if(authenticate()) {
+            try {
+                $userController = new UserController();
+                $existedUser = $userController->validUser($_POST['documento']);
 
-            if ($existedUser) {
+                if ($existedUser) {
 
-                echo json_encode($existedUser, JSON_PRETTY_PRINT);
-            } else {
-                header("HTTP/1.1 400 Bad Request");
-                echo json_encode(null, JSON_PRETTY_PRINT);
+                    echo json_encode($existedUser, JSON_PRETTY_PRINT);
+                } else {
+                    header("HTTP/1.1 400 Bad Request");
+                    echo json_encode(null, JSON_PRETTY_PRINT);
+                }
+            } catch (Exception $e) {
+                header("HTTP/1.1 404 Bad Request");
+                echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
             }
-        } catch (Exception $e) {
-            header("HTTP/1.1 404 Bad Request");
-            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+
+            finally {
+                exit();
+            }
         }
 
-        exit();
+        else {
+            header("HTTP/1.1 401 Unauthorized");
+            exit('Unauthorized');
+        }
     });
 
     /**
@@ -119,23 +115,32 @@ $klein->with('/MiBanco', function () use ($klein) {
      */
     $klein->respond('POST', '/user/client/getAccount', function ($request, $response) {
 
-        try {
-            $userController = new UserController();
-            $existedUser = $userController->getUserAccount($_POST['usuario']);
+        if(authenticate()) {
+            try {
+                $userController = new UserController();
+                $existedUser = $userController->getUserAccount($_POST['usuario']);
 
-            if ($existedUser) {
+                if ($existedUser) {
 
-                echo json_encode($existedUser, JSON_PRETTY_PRINT);
-            } else {
+                    echo json_encode($existedUser, JSON_PRETTY_PRINT);
+                } else {
+                    header("HTTP/1.1 404 Bad Request");
+                    echo json_encode(null, JSON_PRETTY_PRINT);
+                }
+            } catch (Exception $e) {
                 header("HTTP/1.1 404 Bad Request");
-                echo json_encode(null, JSON_PRETTY_PRINT);
+                echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
             }
-        } catch (Exception $e) {
-            header("HTTP/1.1 404 Bad Request");
-            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+
+            finally {
+                exit();
+            }
         }
 
-        exit();
+        else {
+            header("HTTP/1.1 401 Unauthorized");
+            exit('Unauthorized');
+        }
     });
 
     /**
@@ -151,34 +156,43 @@ $klein->with('/MiBanco', function () use ($klein) {
      */
     $klein->respond('POST', '/user/new', function ($request, $response) {
 
-        try {
-            $userController = new UserController();
+        if(authenticate()) {
+            try {
+                $userController = new UserController();
 
-            $tipoUsuario = $_POST['tipo'];
+                $tipoUsuario = $_POST['tipo'];
 
-            $newUserResp = null;
+                $newUserResp = null;
 
-            if ($tipoUsuario === "cliente") {
-                $newUserResp = $userController->createClientUser($_POST['documento'], $tipoUsuario, $_POST['usuario'], $_POST['passwd']);
+                if ($tipoUsuario === "cliente") {
+                    $newUserResp = $userController->createClientUser($_POST['documento'], $tipoUsuario, $_POST['usuario'], $_POST['passwd']);
 
-            } elseif ($tipoUsuario === "admin" or $tipoUsuario === "auditor") {
-                $newUserResp = $userController->createHightUser($_POST['documento'], $tipoUsuario, $_POST['usuario'], $_POST['passwd'], $_POST['nombre']);
-            }
+                } elseif ($tipoUsuario === "admin" or $tipoUsuario === "auditor") {
+                    $newUserResp = $userController->createHightUser($_POST['documento'], $tipoUsuario, $_POST['usuario'], $_POST['passwd'], $_POST['nombre']);
+                }
 
-            if ($newUserResp) {
-                echo json_encode($newUserResp, JSON_PRETTY_PRINT);
+                if ($newUserResp) {
+                    echo json_encode($newUserResp, JSON_PRETTY_PRINT);
 
-            } else {
+                } else {
+                    header("HTTP/1.1 404 Bad Request");
+                    echo json_encode(null, JSON_PRETTY_PRINT);
+                }
+
+            } catch (Exception $e) {
                 header("HTTP/1.1 404 Bad Request");
-                echo json_encode(null, JSON_PRETTY_PRINT);
+                echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
             }
 
-        } catch (Exception $e) {
-            header("HTTP/1.1 404 Bad Request");
-            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+            finally {
+                exit();
+            }
         }
 
-        exit();
+        else {
+            header("HTTP/1.1 401 Unauthorized");
+            exit('Unauthorized');
+        }
     });
 
     /**
@@ -190,25 +204,33 @@ $klein->with('/MiBanco', function () use ($klein) {
      */
     $klein->respond('POST', '/user/getBalance', function ($request, $response) {
 
-        try {
-            $userController = new UserController();
+        if(authenticate()) {
+            try {
+                $userController = new UserController();
 
-            $newUserResp = $userController->getBalance($_POST['num_cuenta']);
+                $newUserResp = $userController->getBalance($_POST['num_cuenta']);
 
-            if ($newUserResp) {
-                echo json_encode($newUserResp, JSON_PRETTY_PRINT);
-            } else {
+                if ($newUserResp) {
+                    echo json_encode($newUserResp, JSON_PRETTY_PRINT);
+                } else {
+                    header("HTTP/1.1 404 Bad Request");
+                    echo json_encode(null, JSON_PRETTY_PRINT);
+                }
+
+            } catch (Exception $e) {
                 header("HTTP/1.1 404 Bad Request");
-                echo json_encode(null, JSON_PRETTY_PRINT);
+                echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
             }
 
-        } catch (Exception $e) {
-            header("HTTP/1.1 404 Bad Request");
-            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+            finally {
+                exit();
+            }
         }
 
-
-        exit();
+        else {
+            header("HTTP/1.1 401 Unauthorized");
+            exit('Unauthorized');
+        }
     });
 
     /**
@@ -220,24 +242,34 @@ $klein->with('/MiBanco', function () use ($klein) {
      *
      */
     $klein->respond('POST', '/user/modifyBalance', function ($request, $response) {
+        if(authenticate()) {
+            try {
+                $userController = new UserController();
 
-        try {
-            $userController = new UserController();
+                $newUserResp = $userController->modifyBalance($_POST['num_cuenta'], $_POST['saldo']);
 
-            $newUserResp = $userController->modifyBalance($_POST['num_cuenta'], $_POST['saldo']);
+                if ($newUserResp) {
+                    echo json_encode($newUserResp, JSON_PRETTY_PRINT);
+                }
+                else {
+                    header("HTTP/1.1 404 Bad Request");
+                    echo json_encode(null, JSON_PRETTY_PRINT);
+                }
 
-            if ($newUserResp) {
-                echo json_encode($newUserResp, JSON_PRETTY_PRINT);
-            } else {
-                header("HTTP/1.1 404 Bad Request");
-                echo json_encode(null, JSON_PRETTY_PRINT);
             }
-
-        } catch (Exception $e) {
-            header("HTTP/1.1 404 Bad Request");
-            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+            catch (Exception $e) {
+                header("HTTP/1.1 404 Bad Request");
+                echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+            }
+            finally {
+                exit();
+            }
         }
-        exit();
+
+        else {
+            header("HTTP/1.1 401 Unauthorized");
+            exit('Unauthorized');
+        }
 
     });
 
@@ -250,22 +282,34 @@ $klein->with('/MiBanco', function () use ($klein) {
      */
     $klein->respond('POST', '/user/overdraft/consult', function ($request, $response) {
 
-        try {
-            $overdraftController = new OverdraftController();
+        if(authenticate()) {
+            try {
+                $overdraftController = new OverdraftController();
 
-            $userOverdrafts = $overdraftController->getUserOverdrafts($_POST['num_cuenta']);
+                $userOverdrafts = $overdraftController->getUserOverdrafts($_POST['num_cuenta']);
 
-            if ($userOverdrafts) {
-                echo json_encode($userOverdrafts, JSON_PRETTY_PRINT);
-            } else {
-                header("HTTP/1.1 404 Bad Request");
-                echo json_encode(null, JSON_PRETTY_PRINT);
+                if ($userOverdrafts) {
+                    echo json_encode($userOverdrafts, JSON_PRETTY_PRINT);
+                }
+                else {
+                    header("HTTP/1.1 404 Bad Request");
+                    echo json_encode(null, JSON_PRETTY_PRINT);
+                }
             }
-        } catch (Exception $e) {
-            header("HTTP/1.1 404 Bad Request");
-            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+
+            catch (Exception $e) {
+                header("HTTP/1.1 404 Bad Request");
+                echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+            }
+            finally {
+                exit();
+            }
         }
-        exit();
+
+        else {
+            header("HTTP/1.1 401 Unauthorized");
+            exit('Unauthorized');
+        }
 
     });
 
@@ -279,22 +323,33 @@ $klein->with('/MiBanco', function () use ($klein) {
      */
     $klein->respond('POST', '/user/overdraft/new', function ($request, $response) {
 
-        try {
-            $overdraftController = new OverdraftController();
+        if(authenticate()) {
+            try {
+                $overdraftController = new OverdraftController();
 
-            $userOverdrafts = $overdraftController->createUserOverdraft($_POST['num_cuenta'], $_POST['saldo']);
+                $userOverdrafts = $overdraftController->createUserOverdraft($_POST['num_cuenta'], $_POST['saldo']);
 
-            if ($userOverdrafts) {
-                echo json_encode($userOverdrafts, JSON_PRETTY_PRINT);
-            } else {
-                header("HTTP/1.1 404 Bad Request");
-                echo json_encode(null, JSON_PRETTY_PRINT);
+                if ($userOverdrafts) {
+                    echo json_encode($userOverdrafts, JSON_PRETTY_PRINT);
+                } else {
+                    header("HTTP/1.1 404 Bad Request");
+                    echo json_encode(null, JSON_PRETTY_PRINT);
+                }
             }
-        } catch (Exception $e) {
-            header("HTTP/1.1 404 Bad Request");
-            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+
+            catch (Exception $e) {
+                header("HTTP/1.1 404 Bad Request");
+                echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+            }
+            finally {
+                exit();
+            }
         }
-        exit();
+
+        else {
+            header("HTTP/1.1 401 Unauthorized");
+            exit('Unauthorized');
+        }
 
     });
 
@@ -306,23 +361,34 @@ $klein->with('/MiBanco', function () use ($klein) {
      */
     $klein->respond('POST', '/overdraft/getAll', function ($request, $response) {
 
-        try {
-            $overdraftController = new OverdraftController();
+        if(authenticate()) {
+            try {
+                $overdraftController = new OverdraftController();
 
-            $userOverdrafts = $overdraftController->getAllOverdrafts();
+                $userOverdrafts = $overdraftController->getAllOverdrafts($_POST['usuario']);
 
-            if ($userOverdrafts) {
-                echo json_encode($userOverdrafts, JSON_PRETTY_PRINT);
-            } else {
-                header("HTTP/1.1 404 Bad Request");
-                echo json_encode(null, JSON_PRETTY_PRINT);
+                if ($userOverdrafts) {
+                    echo json_encode($userOverdrafts, JSON_PRETTY_PRINT);
+                } else {
+                    header("HTTP/1.1 404 Bad Request");
+                    echo json_encode(null, JSON_PRETTY_PRINT);
+                }
             }
-        } catch (Exception $e) {
-            header("HTTP/1.1 404 Bad Request");
-            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+
+            catch (Exception $e) {
+                header("HTTP/1.1 404 Bad Request");
+                echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+            }
+
+            finally {
+                exit();
+            }
         }
 
-        exit();
+        else {
+            header("HTTP/1.1 401 Unauthorized");
+            exit('Unauthorized');
+        }
 
     });
 
@@ -336,26 +402,35 @@ $klein->with('/MiBanco', function () use ($klein) {
      *
      */
     $klein->respond('POST', '/overdraft/update', function ($request, $response) {
-        try {
-            $overdraftController = new OverdraftController();
+        if(authenticate()) {
+            try {
+                $overdraftController = new OverdraftController();
 
-            $updatedOverdraft = $overdraftController->updateOverdraft($_POST['id'], $_POST['estado'], $_POST['porcentaje']);
+                $updatedOverdraft = $overdraftController->updateOverdraft($_POST['id'], $_POST['estado'], $_POST['porcentaje'], $_POST['usuario']);
 
-            if($updatedOverdraft){
-                echo json_encode($updatedOverdraft, JSON_PRETTY_PRINT);
+                if($updatedOverdraft){
+                    echo json_encode($updatedOverdraft, JSON_PRETTY_PRINT);
+                }
+
+                else{
+                    header("HTTP/1.1 404 Bad Request");
+                    echo json_encode(null, JSON_PRETTY_PRINT);
+                }
             }
 
-            else{
+            catch (Exception $e){
                 header("HTTP/1.1 404 Bad Request");
-                echo json_encode(null, JSON_PRETTY_PRINT);
+                echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+            }
+            finally {
+                exit();
             }
         }
 
-        catch (Exception $e){
-            header("HTTP/1.1 404 Bad Request");
-            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+        else {
+            header("HTTP/1.1 401 Unauthorized");
+            exit('Unauthorized');
         }
-        exit();
 
     });
 
@@ -370,28 +445,37 @@ $klein->with('/MiBanco', function () use ($klein) {
      *
      */
     $klein->respond('POST', '/user/transaction/new', function ($request, $response) {
-        try {
 
-            $transtController = new TransController();
+        if(authenticate()) {
+            try {
+                $transtController = new TransController();
 
-            $createdTrans = $transtController->createTransaction($_POST['origen'], $_POST['destino'], $_POST['banco_destino'], $_POST['saldo']);
+                $createdTrans = $transtController->createTransaction($_POST['origen'], $_POST['destino'], $_POST['banco_destino'], $_POST['saldo']);
 
-            if($createdTrans) {
-                echo json_encode($createdTrans, JSON_PRETTY_PRINT);
+                if($createdTrans) {
+                    echo json_encode($createdTrans, JSON_PRETTY_PRINT);
+                }
+
+                else{
+                    header("HTTP/1.1 404 Bad Request");
+                    echo json_encode(null, JSON_PRETTY_PRINT);
+                }
+
             }
 
-            else{
+            catch (Exception $e){
                 header("HTTP/1.1 404 Bad Request");
-                echo json_encode(null, JSON_PRETTY_PRINT);
+                echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
             }
-
+            finally {
+                exit();
+            }
         }
 
-        catch (Exception $e){
-            header("HTTP/1.1 404 Bad Request");
-            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+        else {
+            header("HTTP/1.1 401 Unauthorized");
+            exit('Unauthorized');
         }
-        exit();
 
     });
 
@@ -403,28 +487,36 @@ $klein->with('/MiBanco', function () use ($klein) {
      *
      */
     $klein->respond('POST', '/user/operations/getAll', function ($request, $response) {
-        try {
 
-            $transtController = new TransController();
+        if(authenticate()) {
+            try {
+                $transtController = new TransController();
 
-            $myTrans = $transtController->getAllUserOper($_POST['usuario']);
+                $myTrans = $transtController->getAllUserOper($_POST['usuario']);
 
-            if($myTrans) {
-                echo json_encode($myTrans, JSON_PRETTY_PRINT);
+                if ($myTrans) {
+                    echo json_encode($myTrans, JSON_PRETTY_PRINT);
+                } else {
+                    header("HTTP/1.1 404 Bad Request");
+                    echo json_encode(null, JSON_PRETTY_PRINT);
+                }
+
             }
 
-            else{
+            catch (Exception $e) {
                 header("HTTP/1.1 404 Bad Request");
-                echo json_encode(null, JSON_PRETTY_PRINT);
+                echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
             }
 
+            finally {
+                exit();
+            }
         }
 
-        catch (Exception $e){
-            header("HTTP/1.1 404 Bad Request");
-            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+        else {
+            header("HTTP/1.1 401 Unauthorized");
+            exit('Unauthorized');
         }
-        exit();
 
     });
 
@@ -436,28 +528,40 @@ $klein->with('/MiBanco', function () use ($klein) {
      *
      */
     $klein->respond('POST', '/user/operations/myTransactions', function ($request, $response) {
-        try {
 
-            $transtController = new TransController();
+        if(authenticate()) {
 
-            $myTrans = $transtController->getAllUserTrans($_POST['usuario']);
+                try {
 
-            if($myTrans) {
-                echo json_encode($myTrans, JSON_PRETTY_PRINT);
+                $transtController = new TransController();
+
+                $myTrans = $transtController->getAllUserTrans($_POST['usuario']);
+
+                if($myTrans) {
+                    echo json_encode($myTrans, JSON_PRETTY_PRINT);
+                }
+
+                else{
+                    header("HTTP/1.1 404 Bad Request");
+                    echo json_encode(null, JSON_PRETTY_PRINT);
+                }
+
             }
 
-            else{
+            catch (Exception $e){
                 header("HTTP/1.1 404 Bad Request");
-                echo json_encode(null, JSON_PRETTY_PRINT);
+                echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
             }
 
+            finally {
+                exit();
+            }
         }
 
-        catch (Exception $e){
-            header("HTTP/1.1 404 Bad Request");
-            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+        else {
+            header("HTTP/1.1 401 Unauthorized");
+            exit('Unauthorized');
         }
-        exit();
 
     });
 
@@ -469,82 +573,47 @@ $klein->with('/MiBanco', function () use ($klein) {
      */
     $klein->respond('POST', '/operations/getAll', function ($request, $response) {
 
-        try{
-            $transtController = new TransController();
+        if(authenticate()) {
+            try{
+                $transtController = new TransController();
 
-            $allTrans = $transtController->getAllTrans();
+                $allTrans = $transtController->getAllTrans($_POST['usuario']);
 
-            if($allTrans) {
-                echo json_encode($allTrans, JSON_PRETTY_PRINT);
+                if($allTrans) {
+                    echo json_encode($allTrans, JSON_PRETTY_PRINT);
+                }
+
+                else{
+                    header("HTTP/1.1 404 Bad Request");
+                    echo json_encode(null, JSON_PRETTY_PRINT);
+                }
+
             }
 
-            else{
+            catch (Exception $e){
                 header("HTTP/1.1 404 Bad Request");
-                echo json_encode(null, JSON_PRETTY_PRINT);
+                echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+
             }
 
+            finally {
+                exit();
+            }
         }
 
-        catch (Exception $e){
-            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
-
+        else {
+            header("HTTP/1.1 401 Unauthorized");
+            exit('Unauthorized');
         }
-        exit();
+
     });
-
-
 });
 
 $klein->dispatch();
 
-/*Route::get('ID/{id}',function($id) {
-    echo 'ID: '.$id;
-});
 
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$uri = explode( '/', $uri );
-
-// all of our endpoints start with /person
-// everything else results in a 404 Not Found
-if ($uri[1] !== 'person') {
-    header("HTTP/1.1 404 Not Found");
-    exit();
-}
-
-
-$routeFound = null;
-foreach ($routes as $route) {
-    if ($route['method'] == $requestMethod &&
-        preg_match($route['expression'], $uri))
-    {
-        $routeFound = $route;
-        break;
-    }
-}
-
-if (! $routeFound) {
-    header("HTTP/1.1 404 Not Found");
-    exit();
-}
-
-$methodName = $route['controller_method'];
-
-// authenticate the request:
-if (! authenticate($methodName)) {
-    header("HTTP/1.1 401 Unauthorized");
-    exit('Unauthorized');
-}
-
-$controller = new CustomerController();
-$controller->$methodName($uriParts);*/
-
-
-
-
-// END OF FRONT CONTROLLER
 // OAuth authentication functions follow
-
-function authenticate($methodName)
+function authenticate()
 {
     // extract the token from the headers
     if (!isset($_SERVER['HTTP_AUTHORIZATION'])) {
@@ -560,12 +629,8 @@ function authenticate($methodName)
 
     $token = $matches[1];
 
-    // validate the token
-    if ($methodName == 'charge') {
-        return authenticateRemotely($token);
-    } else {
-        return authenticateLocally($token);
-    }
+    return authenticateRemotely($token);
+
 }
 
 function authenticateRemotely($token)

@@ -27,7 +27,6 @@ class TransController {
         $this->dbExistedClients = new ExistedClientsDB($this->db, $this->dbConn);
         $this->dbTrans = new TransDB($this->db, $this->dbConn);
 
-
     }
 
     /**
@@ -113,9 +112,19 @@ class TransController {
      * @return Retorna una lista con las transacciones existente; Si se produce una excepción retorn false
      *
      */
-    public function getAllTrans() {
+    public function getAllTrans($usuario) {
         try {
-            return $this->dbTrans->getAllTrans()->fetchAll();
+            $rolesValidos = array("auditor", "admin");
+
+            $user = $this->dbUser->getUserByUsername($usuario);
+
+            if(in_array(trim($user["tipo"]), $rolesValidos)) {
+                return $this->dbTrans->getAllTrans()->fetchAll();
+            }
+
+            else {
+                return false;
+            }
 
         }
         catch (exception $e) {
