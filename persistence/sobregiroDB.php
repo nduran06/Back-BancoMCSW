@@ -123,12 +123,13 @@
             return $sobregiro->toArray();
         }
 
-        public function updateSobregiroState($sgId, $nuevoEstado) {
+        public function updateSobregiroState($sgId, $nuevoEstado, $porcentaje) {
 
-            $sql = "UPDATE sobregiro SET estado=:nuevoEstado WHERE id=:sgId";
+            $sql = "UPDATE sobregiro SET estado=:nuevoEstado, porcentaje=:porcentaje WHERE id=:sgId";
 
             $stmt = $this->dbConn->prepare($sql);
             $stmt->bindValue(':nuevoEstado', $nuevoEstado);
+            $stmt->bindValue(':porcentaje', $porcentaje);
             $stmt->bindValue(':sgId', $sgId);
 
             $stmt->execute();

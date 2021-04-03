@@ -4,6 +4,7 @@ require __DIR__ . '/../bootstrap.php';
 include('../Controllers/CustomerController.php');
 include_once('../api/LoginController.php');
 include_once('../api/UserController.php');
+include_once('../api/OverdraftController.php');
 include_once('../client/OKTAToken.php');
 
 
@@ -68,15 +69,11 @@ $klein->with('/MiBanco', function () use ($klein) {
                 ];
 
                 echo json_encode($ans, JSON_PRETTY_PRINT);
-            }
-
-            else {
+            } else {
                 header("HTTP/1.1 401 Unauthorized");
                 echo json_encode(null, JSON_PRETTY_PRINT);
             }
-        }
-
-        catch (Exception $e){
+        } catch (Exception $e) {
             header("HTTP/1.1 404 Bad Request");
             echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
         }
@@ -95,20 +92,16 @@ $klein->with('/MiBanco', function () use ($klein) {
 
         try {
             $userController = new UserController();
-            $existedUser = $userController -> validUser($_POST['documento']);
+            $existedUser = $userController->validUser($_POST['documento']);
 
-            if($existedUser) {
+            if ($existedUser) {
 
                 echo json_encode($existedUser, JSON_PRETTY_PRINT);
-            }
-
-            else {
+            } else {
                 header("HTTP/1.1 400 Bad Request");
                 echo json_encode(null, JSON_PRETTY_PRINT);
             }
-        }
-
-        catch (Exception $e){
+        } catch (Exception $e) {
             header("HTTP/1.1 404 Bad Request");
             echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
         }
@@ -132,15 +125,11 @@ $klein->with('/MiBanco', function () use ($klein) {
             if ($existedUser) {
 
                 echo json_encode($existedUser, JSON_PRETTY_PRINT);
-            }
-
-            else {
+            } else {
                 header("HTTP/1.1 404 Bad Request");
                 echo json_encode(null, JSON_PRETTY_PRINT);
             }
-        }
-
-        catch (Exception $e){
+        } catch (Exception $e) {
             header("HTTP/1.1 404 Bad Request");
             echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
         }
@@ -168,28 +157,22 @@ $klein->with('/MiBanco', function () use ($klein) {
 
             $newUserResp = null;
 
-            if($tipoUsuario === "cliente") {
+            if ($tipoUsuario === "cliente") {
                 $newUserResp = $userController->createClientUser($_POST['documento'], $tipoUsuario, $_POST['usuario'], $_POST['passwd']);
 
-            }
-
-            elseif($tipoUsuario === "admin" or $tipoUsuario === "auditor") {
+            } elseif ($tipoUsuario === "admin" or $tipoUsuario === "auditor") {
                 $newUserResp = $userController->createHightUser($_POST['documento'], $tipoUsuario, $_POST['usuario'], $_POST['passwd'], $_POST['nombre']);
             }
 
-            if($newUserResp) {
+            if ($newUserResp) {
                 echo json_encode($newUserResp, JSON_PRETTY_PRINT);
 
-            }
-
-            else {
+            } else {
                 header("HTTP/1.1 404 Bad Request");
                 echo json_encode(null, JSON_PRETTY_PRINT);
             }
 
-        }
-
-        catch (Exception $e){
+        } catch (Exception $e) {
             header("HTTP/1.1 404 Bad Request");
             echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
         }
@@ -211,18 +194,14 @@ $klein->with('/MiBanco', function () use ($klein) {
 
             $newUserResp = $userController->getBalance($_POST['num_cuenta']);
 
-            if($newUserResp) {
+            if ($newUserResp) {
                 echo json_encode($newUserResp, JSON_PRETTY_PRINT);
-            }
-
-            else{
+            } else {
                 header("HTTP/1.1 404 Bad Request");
                 echo json_encode(null, JSON_PRETTY_PRINT);
             }
 
-        }
-
-        catch (Exception $e){
+        } catch (Exception $e) {
             header("HTTP/1.1 404 Bad Request");
             echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
         }
@@ -246,30 +225,138 @@ $klein->with('/MiBanco', function () use ($klein) {
 
             $newUserResp = $userController->modifyBalance($_POST['num_cuenta'], $_POST['saldo']);
 
-            if($newUserResp) {
+            if ($newUserResp) {
                 echo json_encode($newUserResp, JSON_PRETTY_PRINT);
+            } else {
+                header("HTTP/1.1 404 Bad Request");
+                echo json_encode(null, JSON_PRETTY_PRINT);
+            }
+
+        } catch (Exception $e) {
+            header("HTTP/1.1 404 Bad Request");
+            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+        }
+        exit();
+
+    });
+
+    /**
+     * /MiBanco/user/overdraft/consult
+     *
+     * Petición para obtener los sobregiros de un usuario cliente
+     * Parámetros HTTP: num_cuenta -> Número de la cuenta bancaria del usuario
+     *
+     */
+    $klein->respond('POST', '/user/overdraft/consult', function ($request, $response) {
+
+        try {
+            $overdraftController = new OverdraftController();
+
+            $userOverdrafts = $overdraftController->getUserOverdrafts($_POST['num_cuenta']);
+
+            if ($userOverdrafts) {
+                echo json_encode($userOverdrafts, JSON_PRETTY_PRINT);
+            } else {
+                header("HTTP/1.1 404 Bad Request");
+                echo json_encode(null, JSON_PRETTY_PRINT);
+            }
+        } catch (Exception $e) {
+            header("HTTP/1.1 404 Bad Request");
+            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+        }
+        exit();
+
+    });
+
+    /**
+     * /MiBanco/user/overdraft/new
+     *
+     * Petición para crear un nuevo sobregiros
+     * Parámetros HTTP: num_cuenta -> Número de la cuenta bancaria del usuario
+     *                  saldo -> Saldo solicitado paa el sobregiro
+     *
+     */
+    $klein->respond('POST', '/user/overdraft/new', function ($request, $response) {
+
+        try {
+            $overdraftController = new OverdraftController();
+
+            $userOverdrafts = $overdraftController->createUserOverdraft($_POST['num_cuenta'], $_POST['saldo']);
+
+            if ($userOverdrafts) {
+                echo json_encode($userOverdrafts, JSON_PRETTY_PRINT);
+            } else {
+                header("HTTP/1.1 404 Bad Request");
+                echo json_encode(null, JSON_PRETTY_PRINT);
+            }
+        } catch (Exception $e) {
+            header("HTTP/1.1 404 Bad Request");
+            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+        }
+        exit();
+
+    });
+
+    /**
+     * /MiBanco/overdraft/getAll
+     *
+     * Petición para obtener todos los sobregiros que han sido creados
+     *
+     */
+    $klein->respond('POST', '/overdraft/getAll', function ($request, $response) {
+
+        try {
+            $overdraftController = new OverdraftController();
+
+            $userOverdrafts = $overdraftController->getAllOverdrafts();
+
+            if ($userOverdrafts) {
+                echo json_encode($userOverdrafts, JSON_PRETTY_PRINT);
+            } else {
+                header("HTTP/1.1 404 Bad Request");
+                echo json_encode(null, JSON_PRETTY_PRINT);
+            }
+        } catch (Exception $e) {
+            header("HTTP/1.1 404 Bad Request");
+            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+        }
+
+        exit();
+
+    });
+
+    /**
+     * Petición para actualizar el estado y porcentaje (si se aprueba) de un sobregiro
+     * Parámetros HTTP: id -> Id del sobregiro
+     *                  estado -> Nuevo estado del sobregiro
+     *                  porcentaje -> Porcentaje de aprobación (opcional)
+     *
+     */
+    $klein->respond('POST', '/overdraft/update', function ($request, $response) {
+        try {
+            $overdraftController = new OverdraftController();
+
+            $updatedOverdraft = $overdraftController->updateOverdraft($_POST['id'], $_POST['estado'], $_POST['porcentaje']);
+
+            if($updatedOverdraft){
+                echo json_encode($updatedOverdraft, JSON_PRETTY_PRINT);
             }
 
             else{
                 header("HTTP/1.1 404 Bad Request");
                 echo json_encode(null, JSON_PRETTY_PRINT);
             }
-
         }
 
         catch (Exception $e){
             header("HTTP/1.1 404 Bad Request");
             echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
         }
-
-
         exit();
 
     });
 
 });
-
-
 
 $klein->dispatch();
 

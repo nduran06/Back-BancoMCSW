@@ -66,9 +66,6 @@ class CuentaDB {
 
         return $statement->setFetchMode(PDO::FETCH_ASSOC);
     }
-    
-    
-    
 
     public function getAccountBalance($cuenta) {
 
