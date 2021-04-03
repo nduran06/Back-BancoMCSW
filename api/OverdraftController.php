@@ -13,7 +13,6 @@ class OverdraftController {
     private $dbConn;
     private $dbUser;
     private $dbCuenta;
-    private $dbExistedClients;
     private $dbSobregiro;
 
     public function __construct() {
@@ -23,9 +22,7 @@ class OverdraftController {
 
         $this->dbUser = new UserDB($this->db, $this->dbConn);
         $this->dbCuenta = new CuentaDB($this->db, $this->dbConn);
-        $this->dbExistedClients = new ExistedClientsDB($this->db, $this->dbConn);
         $this->dbSobregiro = new SobregiroDB($this->db, $this->dbConn);
-
     }
 
     /**

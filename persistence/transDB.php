@@ -1,7 +1,7 @@
 <?php
 
-include('cuentaDB.php');
-include('externalEntDB.php');
+include_once('cuentaDB.php');
+include_once('externalEntDB.php');
 
 
     class TransDB {

@@ -5,12 +5,13 @@ include('../Controllers/CustomerController.php');
 include_once('../api/LoginController.php');
 include_once('../api/UserController.php');
 include_once('../api/OverdraftController.php');
+include_once('../api/TransController.php');
 include_once('../client/OKTAToken.php');
-
 
 use \Firebase\JWT\JWT;
 use \Firebase\JWT\JWK;
 use \Klein\Klein;
+
 // send some CORS headers so the API can be called from anywhere
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
@@ -18,7 +19,7 @@ header("Access-Control-Allow-Methods: OPTIONS,GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+/*$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 $uriParts = explode( '/', $uri );
 
@@ -39,7 +40,7 @@ $routes = [
         'expression' => '/^\/customers\/(\d+)\/charges\/?$/',
         'controller_method' => 'charge'
     ]
-];
+];*/
 
 $klein = new Klein();
 
@@ -326,10 +327,12 @@ $klein->with('/MiBanco', function () use ($klein) {
     });
 
     /**
+     * /MiBanco/overdraft/update
+     *
      * Petición para actualizar el estado y porcentaje (si se aprueba) de un sobregiro
      * Parámetros HTTP: id -> Id del sobregiro
      *                  estado -> Nuevo estado del sobregiro
-     *                  porcentaje -> Porcentaje de aprobación (opcional)
+     *                  porcentaje -> Porcentaje de aprobación (sólo es necesario si se aprueba el sobregiro)
      *
      */
     $klein->respond('POST', '/overdraft/update', function ($request, $response) {
@@ -355,6 +358,140 @@ $klein->with('/MiBanco', function () use ($klein) {
         exit();
 
     });
+
+    /**
+     * /MiBanco/user/transaction/new
+     *
+     * Petición para crear una nueva transacción
+     * Parámetros HTTP: origen -> Cuenta bancaria que realiza la transacción
+     *                  destino -> Cuenta bancaria que recibe la transacción
+     *                  banco_destino -> Nombre del banco al que pertenece la cuenta bancaria de destino
+     *                  saldo -> Cantidad de dinero que desea transferirse
+     *
+     */
+    $klein->respond('POST', '/user/transaction/new', function ($request, $response) {
+        try {
+
+            $transtController = new TransController();
+
+            $createdTrans = $transtController->createTransaction($_POST['origen'], $_POST['destino'], $_POST['banco_destino'], $_POST['saldo']);
+
+            if($createdTrans) {
+                echo json_encode($createdTrans, JSON_PRETTY_PRINT);
+            }
+
+            else{
+                header("HTTP/1.1 404 Bad Request");
+                echo json_encode(null, JSON_PRETTY_PRINT);
+            }
+
+        }
+
+        catch (Exception $e){
+            header("HTTP/1.1 404 Bad Request");
+            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+        }
+        exit();
+
+    });
+
+    /**
+     * /MiBanco/user/operations/getAll
+     *
+     * Petición para obtener todas las transacciones que ha hecho un usuario (exitosas y rechazadas) y las transacciones que ha recibido
+     * Parámetros HTTP: usuario -> Nombre de usuario
+     *
+     */
+    $klein->respond('POST', '/user/operations/getAll', function ($request, $response) {
+        try {
+
+            $transtController = new TransController();
+
+            $myTrans = $transtController->getAllUserOper($_POST['usuario']);
+
+            if($myTrans) {
+                echo json_encode($myTrans, JSON_PRETTY_PRINT);
+            }
+
+            else{
+                header("HTTP/1.1 404 Bad Request");
+                echo json_encode(null, JSON_PRETTY_PRINT);
+            }
+
+        }
+
+        catch (Exception $e){
+            header("HTTP/1.1 404 Bad Request");
+            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+        }
+        exit();
+
+    });
+
+    /**
+     * /MiBanco/user/operations/myTransactions
+     *
+     * Petición para obtener todas las transacciones que ha hecho un usuario (exitosas y rechazadas)
+     * Parámetros HTTP: usuario -> Nombre de usuario
+     *
+     */
+    $klein->respond('POST', '/user/operations/myTransactions', function ($request, $response) {
+        try {
+
+            $transtController = new TransController();
+
+            $myTrans = $transtController->getAllUserTrans($_POST['usuario']);
+
+            if($myTrans) {
+                echo json_encode($myTrans, JSON_PRETTY_PRINT);
+            }
+
+            else{
+                header("HTTP/1.1 404 Bad Request");
+                echo json_encode(null, JSON_PRETTY_PRINT);
+            }
+
+        }
+
+        catch (Exception $e){
+            header("HTTP/1.1 404 Bad Request");
+            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+        }
+        exit();
+
+    });
+
+    /**
+     * /MiBanco/operations/getAll
+     *
+     * Petición para obtener todas las transacciones en la base de datos
+     *
+     */
+    $klein->respond('POST', '/operations/getAll', function ($request, $response) {
+
+        try{
+            $transtController = new TransController();
+
+            $allTrans = $transtController->getAllTrans();
+
+            if($allTrans) {
+                echo json_encode($allTrans, JSON_PRETTY_PRINT);
+            }
+
+            else{
+                header("HTTP/1.1 404 Bad Request");
+                echo json_encode(null, JSON_PRETTY_PRINT);
+            }
+
+        }
+
+        catch (Exception $e){
+            echo json_encode("Datos incorrectos", JSON_PRETTY_PRINT);
+
+        }
+        exit();
+    });
+
 
 });
 
