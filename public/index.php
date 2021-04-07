@@ -41,7 +41,14 @@ $klein->with('/MiBanco', function () use ($klein) {
 
         try {
             $userLogin = new LoginController();
-            $userRole = $userLogin->login($_POST['usuario'], $_POST['passwd']);
+
+            $_POST = json_decode(array_keys($_POST)[0], true);
+
+            $user = filter_var($_POST['usuario'], FILTER_SANITIZE_STRING);
+            $pass = filter_var($_POST['passwd'], FILTER_SANITIZE_STRING);
+
+
+            $userRole = $userLogin->login($user, $pass);
 
             if ($userRole) {
                 $oktaAuth = new OKTAToken();

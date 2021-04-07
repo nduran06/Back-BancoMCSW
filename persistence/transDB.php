@@ -1,6 +1,6 @@
 <?php
 
-include_once('cuentaDB.php');
+include_once('CuentaDB.php');
 include_once('externalEntDB.php');
 
 

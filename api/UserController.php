@@ -4,7 +4,7 @@ include_once('../classes/Usuario.php');
 include_once('../classes/Cuenta.php');
 include_once('../persistence/existedClientsDB.php');
 include_once('../persistence/userDB.php');
-include_once('../persistence/cuentaDB.php');
+include_once('../persistence/CuentaDB.php');
 include_once('../database/config.php');
 include_once('../database/utils.php');
 
