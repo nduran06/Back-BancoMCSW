@@ -1,3 +1,2 @@
-install composer
-install firebase with composer
-Fligth https://flightphp.com/install
+install composer: sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+
