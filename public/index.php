@@ -88,7 +88,12 @@ $klein->with('/MiBanco', function () use ($klein) {
         if(authenticate()) {
             try {
                 $userController = new UserController();
-                $existedUser = $userController->validUser($_POST['documento']);
+
+                $_POST = json_decode(array_keys($_POST)[0], true);
+
+                $documento = filter_var($_POST['documento'], FILTER_SANITIZE_STRING);
+
+                $existedUser = $userController->validUser($documento);
 
                 if ($existedUser) {
 
@@ -165,17 +170,23 @@ $klein->with('/MiBanco', function () use ($klein) {
 
         if(authenticate()) {
             try {
+                $_POST = json_decode(array_keys($_POST)[0], true);
+
                 $userController = new UserController();
 
-                $tipoUsuario = $_POST['tipo'];
+                $tipoUsuario = sanitizeParameter($_POST, 'tipo');
+                $docUsuario = sanitizeParameter($_POST, 'documento');
+                $nombreUsuario = sanitizeParameter($_POST, 'nombre');
+                $userUsuario = sanitizeParameter($_POST, 'usuario');
+                $passUsuario = sanitizeParameter($_POST, 'passwd');
 
                 $newUserResp = null;
 
                 if ($tipoUsuario === "cliente") {
-                    $newUserResp = $userController->createClientUser($_POST['documento'], $tipoUsuario, $_POST['usuario'], $_POST['passwd']);
+                    $newUserResp = $userController->createClientUser($docUsuario, $tipoUsuario, $userUsuario, $passUsuario);
 
                 } elseif ($tipoUsuario === "admin" or $tipoUsuario === "auditor") {
-                    $newUserResp = $userController->createHightUser($_POST['documento'], $tipoUsuario, $_POST['usuario'], $_POST['passwd'], $_POST['nombre']);
+                    $newUserResp = $userController->createHightUser($docUsuario, $tipoUsuario, $userUsuario, $passUsuario, $nombreUsuario);
                 }
 
                 if ($newUserResp) {
@@ -213,6 +224,7 @@ $klein->with('/MiBanco', function () use ($klein) {
 
         if(authenticate()) {
             try {
+
                 $userController = new UserController();
 
                 $newUserResp = $userController->getBalance($_POST['num_cuenta']);
@@ -251,9 +263,13 @@ $klein->with('/MiBanco', function () use ($klein) {
     $klein->respond('POST', '/user/modifyBalance', function ($request, $response) {
         if(authenticate()) {
             try {
+                $_POST = json_decode(array_keys($_POST)[0], true);
+                $num_cuenta = sanitizeParameter($_POST, 'num_cuenta');
+                $saldo = sanitizeParameter($_POST, 'saldo');
+
                 $userController = new UserController();
 
-                $newUserResp = $userController->modifyBalance($_POST['num_cuenta'], $_POST['saldo']);
+                $newUserResp = $userController->modifyBalance($num_cuenta, $saldo);
 
                 if ($newUserResp) {
                     echo json_encode($newUserResp, JSON_PRETTY_PRINT);
@@ -323,7 +339,7 @@ $klein->with('/MiBanco', function () use ($klein) {
     /**
      * /MiBanco/user/overdraft/new
      *
-     * Petición para crear un nuevo sobregiros
+     * Petición para crear un nuevo sobregiro
      * Parámetros HTTP: num_cuenta -> Número de la cuenta bancaria del usuario
      *                  saldo -> Saldo solicitado paa el sobregiro
      *
@@ -364,15 +380,19 @@ $klein->with('/MiBanco', function () use ($klein) {
      * /MiBanco/overdraft/getAll
      *
      * Petición para obtener todos los sobregiros que han sido creados
+     * Parámetros HTTP: usuario -> Nombre de usuario de quien realiza la petición
      *
      */
     $klein->respond('POST', '/overdraft/getAll', function ($request, $response) {
 
         if(authenticate()) {
             try {
+                $_POST = json_decode(array_keys($_POST)[0], true);
+                $usuario = sanitizeParameter($_POST, 'usuario');
+
                 $overdraftController = new OverdraftController();
 
-                $userOverdrafts = $overdraftController->getAllOverdrafts($_POST['usuario']);
+                $userOverdrafts = $overdraftController->getAllOverdrafts($usuario);
 
                 if ($userOverdrafts) {
                     echo json_encode($userOverdrafts, JSON_PRETTY_PRINT);
@@ -406,14 +426,21 @@ $klein->with('/MiBanco', function () use ($klein) {
      * Parámetros HTTP: id -> Id del sobregiro
      *                  estado -> Nuevo estado del sobregiro
      *                  porcentaje -> Porcentaje de aprobación (sólo es necesario si se aprueba el sobregiro)
+     *                  usuario -> Nombre de usuario de quien realiza la petición
      *
      */
     $klein->respond('POST', '/overdraft/update', function ($request, $response) {
         if(authenticate()) {
             try {
+                $_POST = json_decode(array_keys($_POST)[0], true);
+                $id = sanitizeParameter($_POST, 'id');
+                $estado = sanitizeParameter($_POST, 'estado');
+                $porcentaje = sanitizeParameter($_POST, 'porcentaje');
+                $usuario = sanitizeParameter($_POST, 'usuario');
+
                 $overdraftController = new OverdraftController();
 
-                $updatedOverdraft = $overdraftController->updateOverdraft($_POST['id'], $_POST['estado'], $_POST['porcentaje'], $_POST['usuario']);
+                $updatedOverdraft = $overdraftController->updateOverdraft($id, $estado, $porcentaje, $usuario);
 
                 if($updatedOverdraft){
                     echo json_encode($updatedOverdraft, JSON_PRETTY_PRINT);
@@ -618,6 +645,12 @@ $klein->with('/MiBanco', function () use ($klein) {
 
 $klein->dispatch();
 
+
+function sanitizeParameter($post, $param){
+
+    return filter_var($post[$param], FILTER_SANITIZE_STRING);
+
+}
 
 // OAuth authentication functions follow
 function authenticate()

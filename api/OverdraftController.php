@@ -79,6 +79,7 @@ class OverdraftController {
     /**
      * Función para obtener todos los sobregiros que han sido creados
      *
+     * @param $usuario Nombre de usuario de quien realiza la solicitud de actualización
      * @return Retorna una lista con los sobregiros; si se produce una excepción retorna false
      *
      */
@@ -108,6 +109,7 @@ class OverdraftController {
      * @param $idSobregiro Id del sobregiro
      * @param $estadoSobregiro Estado del sobregiro
      * @param $porcentaje Porcentaje de aprobación
+     * @param $usuario Nombre de usuario de quien realiza la solicitud de actualización
      * @return Retorna true si la actualización del estado se realizó correctamente; de lo contrario (o si se produce una excepción) retorna false
      */
     public function updateOverdraft($idSobregiro, $estadoSobregiro, $porcentaje, $usuario){
@@ -120,7 +122,7 @@ class OverdraftController {
 
             if(in_array(trim($user["tipo"]), $rolesValidos)) {
 
-                $estadosValidos = array("en proceso", "aprobado", "rechazado");
+                $estadosValidos = array("en_proceso", "aprobado", "rechazado");
 
                 $realPerc = 100;
 
@@ -132,12 +134,14 @@ class OverdraftController {
 
                     if($realPerc > 0 and $realPerc <= 100) {
 
-                        if($estadoSobregiro === "en proceso"){
+                        if($estadoSobregiro === "en_proceso"){
                             $realPerc = 0;
+                            $estadoSobregiro = "en proceso";
                         }
-
                         return $this->dbSobregiro -> updateSobregiroState($idSobregiro, $estadoSobregiro, $realPerc);
+
                     }
+                    return false;
                 }
 
                 else {
