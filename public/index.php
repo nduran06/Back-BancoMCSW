@@ -43,20 +43,22 @@ $klein->with('/MiBanco', function () use ($klein) {
             $userLogin = new LoginController();
 
             $_POST = json_decode(array_keys($_POST)[0], true);
-
-            $user = filter_var($_POST['usuario'], FILTER_SANITIZE_STRING);
-            $pass = filter_var($_POST['passwd'], FILTER_SANITIZE_STRING);
-
+            $user = sanitizeParameter($_POST, 'usuario');
+            $pass = sanitizeParameter($_POST, 'passwd');
 
             $userRole = $userLogin->login($user, $pass);
 
             if ($userRole) {
+                $userController = new UserController();
+                $numCuenta = $userController->getUserAccount($user);
+
                 $oktaAuth = new OKTAToken();
                 $token = $oktaAuth->getValidToken();
 
                 $ans = [
                     'role' => $userRole,
-                    'token' => $token
+                    'token' => $token,
+                    'cuenta' => $numCuenta
                 ];
 
                 echo json_encode($ans, JSON_PRETTY_PRINT);
@@ -87,11 +89,10 @@ $klein->with('/MiBanco', function () use ($klein) {
 
         if(authenticate()) {
             try {
-                $userController = new UserController();
-
                 $_POST = json_decode(array_keys($_POST)[0], true);
+                $documento = sanitizeParameter($_POST, 'documento');
 
-                $documento = filter_var($_POST['documento'], FILTER_SANITIZE_STRING);
+                $userController = new UserController();
 
                 $existedUser = $userController->validUser($documento);
 
@@ -129,8 +130,12 @@ $klein->with('/MiBanco', function () use ($klein) {
 
         if(authenticate()) {
             try {
+
+                $_POST = json_decode(array_keys($_POST)[0], true);
+                $usuario = sanitizeParameter($_POST, 'usuario');
+
                 $userController = new UserController();
-                $existedUser = $userController->getUserAccount($_POST['usuario']);
+                $existedUser = $userController->getUserAccount($usuario);
 
                 if ($existedUser) {
 
@@ -171,14 +176,13 @@ $klein->with('/MiBanco', function () use ($klein) {
         if(authenticate()) {
             try {
                 $_POST = json_decode(array_keys($_POST)[0], true);
-
-                $userController = new UserController();
-
                 $tipoUsuario = sanitizeParameter($_POST, 'tipo');
                 $docUsuario = sanitizeParameter($_POST, 'documento');
                 $nombreUsuario = sanitizeParameter($_POST, 'nombre');
                 $userUsuario = sanitizeParameter($_POST, 'usuario');
                 $passUsuario = sanitizeParameter($_POST, 'passwd');
+
+                $userController = new UserController();
 
                 $newUserResp = null;
 
@@ -217,24 +221,28 @@ $klein->with('/MiBanco', function () use ($klein) {
      *  /MiBanco/user/getBalance
      *
      * Petición para obtener el dinero que posee un usuario cliente en su cuenta
-     * Parámetros HTTP: num_cuenta -> Número de la cuenta bancaria
+     * Parámetros HTTP: usuario -> Nombre de usuario del cliente
      *
      */
     $klein->respond('POST', '/user/getBalance', function ($request, $response) {
 
         if(authenticate()) {
             try {
+                $_POST = json_decode(array_keys($_POST)[0], true);
+                $numCuenta = sanitizeParameter($_POST, 'num_cuenta');
 
                 $userController = new UserController();
 
-                $newUserResp = $userController->getBalance($_POST['num_cuenta']);
+                $balance = $userController->getBalance($numCuenta);
 
-                if ($newUserResp) {
-                    echo json_encode($newUserResp, JSON_PRETTY_PRINT);
+                if ($balance) {
+                    echo json_encode($balance, JSON_PRETTY_PRINT);
                 } else {
                     header("HTTP/1.1 404 Bad Request");
                     echo json_encode(null, JSON_PRETTY_PRINT);
                 }
+
+
 
             } catch (Exception $e) {
                 header("HTTP/1.1 404 Bad Request");
@@ -307,9 +315,13 @@ $klein->with('/MiBanco', function () use ($klein) {
 
         if(authenticate()) {
             try {
+
+                $_POST = json_decode(array_keys($_POST)[0], true);
+                $num_cuenta = sanitizeParameter($_POST, 'num_cuenta');
+
                 $overdraftController = new OverdraftController();
 
-                $userOverdrafts = $overdraftController->getUserOverdrafts($_POST['num_cuenta']);
+                $userOverdrafts = $overdraftController->getUserOverdrafts($num_cuenta);
 
                 if ($userOverdrafts) {
                     echo json_encode($userOverdrafts, JSON_PRETTY_PRINT);
@@ -348,9 +360,13 @@ $klein->with('/MiBanco', function () use ($klein) {
 
         if(authenticate()) {
             try {
+                $_POST = json_decode(array_keys($_POST)[0], true);
+                $num_cuenta = sanitizeParameter($_POST, 'num_cuenta');
+                $saldo = sanitizeParameter($_POST, 'saldo');
+
                 $overdraftController = new OverdraftController();
 
-                $userOverdrafts = $overdraftController->createUserOverdraft($_POST['num_cuenta'], $_POST['saldo']);
+                $userOverdrafts = $overdraftController->createUserOverdraft($num_cuenta, $saldo);
 
                 if ($userOverdrafts) {
                     echo json_encode($userOverdrafts, JSON_PRETTY_PRINT);
@@ -482,9 +498,15 @@ $klein->with('/MiBanco', function () use ($klein) {
 
         if(authenticate()) {
             try {
+                $_POST = json_decode(array_keys($_POST)[0], true);
+                $origen = sanitizeParameter($_POST, 'origen');
+                $destino = sanitizeParameter($_POST, 'destino');
+                $banco_destino = sanitizeParameter($_POST, 'banco_destino');
+                $saldo = sanitizeParameter($_POST, 'saldo');
+
                 $transtController = new TransController();
 
-                $createdTrans = $transtController->createTransaction($_POST['origen'], $_POST['destino'], $_POST['banco_destino'], $_POST['saldo']);
+                $createdTrans = $transtController->createTransaction($origen, $destino, $banco_destino, $saldo);
 
                 if($createdTrans) {
                     echo json_encode($createdTrans, JSON_PRETTY_PRINT);
@@ -524,9 +546,12 @@ $klein->with('/MiBanco', function () use ($klein) {
 
         if(authenticate()) {
             try {
+                $_POST = json_decode(array_keys($_POST)[0], true);
+                $usuario = sanitizeParameter($_POST, 'usuario');
+
                 $transtController = new TransController();
 
-                $myTrans = $transtController->getAllUserOper($_POST['usuario']);
+                $myTrans = $transtController->getAllUserOper($usuario);
 
                 if ($myTrans) {
                     echo json_encode($myTrans, JSON_PRETTY_PRINT);
@@ -565,11 +590,13 @@ $klein->with('/MiBanco', function () use ($klein) {
 
         if(authenticate()) {
 
-                try {
+            try {
+                $_POST = json_decode(array_keys($_POST)[0], true);
+                $usuario = sanitizeParameter($_POST, 'usuario');
 
                 $transtController = new TransController();
 
-                $myTrans = $transtController->getAllUserTrans($_POST['usuario']);
+                $myTrans = $transtController->getAllUserTrans($usuario);
 
                 if($myTrans) {
                     echo json_encode($myTrans, JSON_PRETTY_PRINT);
@@ -603,15 +630,20 @@ $klein->with('/MiBanco', function () use ($klein) {
      * /MiBanco/operations/getAll
      *
      * Petición para obtener todas las transacciones en la base de datos
-     *
+     * Parámetros HTTP: usuario -> Nombre de usuario de quien realiza la petición
+
      */
     $klein->respond('POST', '/operations/getAll', function ($request, $response) {
 
         if(authenticate()) {
             try{
+
+                $_POST = json_decode(array_keys($_POST)[0], true);
+                $usuario = sanitizeParameter($_POST, 'usuario');
+
                 $transtController = new TransController();
 
-                $allTrans = $transtController->getAllTrans($_POST['usuario']);
+                $allTrans = $transtController->getAllTrans($usuario);
 
                 if($allTrans) {
                     echo json_encode($allTrans, JSON_PRETTY_PRINT);

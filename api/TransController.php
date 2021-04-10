@@ -42,11 +42,20 @@ class TransController {
     public function createTransaction($cuentaOrigen, $cuentaDestino, $bancoDestino, $saldo) {
 
         try {
-            $date = new DateTime();
+            $bancosValidos = array('MIBANCO', 'COLPATRIA', 'BANCOLOMBIA', 'BBVA', 'BANCOBOGOTA');
 
-            $trans = new Transaccion($cuentaOrigen, $cuentaDestino, "MIBANCO", $bancoDestino, $saldo, "en proceso", $date->format('Y-m-d H:i:s'));
+            if(in_array($bancoDestino, $bancosValidos)) {
 
-            return $this->dbTrans->createTrans($trans);
+                $date = new DateTime();
+
+                $trans = new Transaccion($cuentaOrigen, $cuentaDestino, "MIBANCO", $bancoDestino, $saldo, "en proceso", $date->format('Y-m-d H:i:s'));
+
+                return $this->dbTrans->createTrans($trans);
+            }
+
+            else{
+                return false;
+            }
         }
 
         catch (exception $e) {
@@ -109,6 +118,7 @@ class TransController {
     /**
      * Función para obtener todas las transacciones existentes en la base de datos
      *
+     * @param $usuario Nombre de usuario de quien realiza la petición
      * @return Retorna una lista con las transacciones existente; Si se produce una excepción retorn false
      *
      */
