@@ -52,3 +52,7 @@
 [https://github.com/SoyTiyi/Front_MCSW](https://github.com/SoyTiyi/Front_MCSW) 
 
 
+# Arquitectura
+
+![Arquitectura de la aplicacón](https://github.com/nduran06/Back-BancoMCSW/tree/master/imgs/arqui.jpeg)
+
