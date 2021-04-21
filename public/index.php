@@ -1,12 +1,16 @@
 <?php
+
+//lineas agregadas -> 53 y 192
+//lineas modificadas -> 55 , 199 y 202
+
 require __DIR__ . '/../bootstrap.php';
 
-include('../Controllers/CustomerController.php');
 include_once('../api/LoginController.php');
 include_once('../api/UserController.php');
 include_once('../api/OverdraftController.php');
 include_once('../api/TransController.php');
 include_once('../client/OKTAToken.php');
+include_once('../auxiliar/cript.php');
 
 use \Firebase\JWT\JWT;
 use \Firebase\JWT\JWK;
@@ -28,6 +32,7 @@ $klein = new Klein();
  * /MiBanco
  */
 $klein->with('/MiBanco', function () use ($klein) {
+
 
     /**
      * /MiBanco/login
@@ -65,7 +70,7 @@ $klein->with('/MiBanco', function () use ($klein) {
             }
 
             else {
-                header("HTTP/1.1 401 Unauthorized");
+                header("HTTP/1.1 404 Unauthorized");
                 echo json_encode(null, JSON_PRETTY_PRINT);
             }
         } catch (Exception $e) {
@@ -79,18 +84,21 @@ $klein->with('/MiBanco', function () use ($klein) {
     });
 
     /**
-     * /MiBanco/validator/user
+     * /MiBanco/signup
      *
-     * Petición para verificar si un usuario que quiere registrarse en la app, en realidad tiene una cuenta bancaria existente en MiBanco
+     * Petición para registrar un nuevo usuario en la app (tiene que tener una cuenta bancaria (cuenta_existente) en MiBanco)
      * Parámetros HTTP: documento -> Número del documento de identidad del posible nuevo usuario
+     *                               usuario -> Nombre de usuario
+     *                               passwd -> Contraseña del usuario que quiere crear una cuenta
      *
      */
-    $klein->respond('POST', '/validator/user', function ($request, $response) {
+    $klein->respond('POST', '/signup', function ($request, $response) {
 
-        if(authenticate()) {
             try {
                 $_POST = json_decode(array_keys($_POST)[0], true);
                 $documento = sanitizeParameter($_POST, 'documento');
+                $nombreUsuario = sanitizeParameter($_POST, 'usuario');
+                $passwd = sanitizeParameter($_POST, 'passwd');
 
                 $userController = new UserController();
 
@@ -98,10 +106,12 @@ $klein->with('/MiBanco', function () use ($klein) {
 
                 if ($existedUser) {
 
+                    $existedUser = $userController->createClientUser($documento, 'cliente', $nombreUsuario, $passwd);
+
                     echo json_encode($existedUser, JSON_PRETTY_PRINT);
                 } else {
                     header("HTTP/1.1 400 Bad Request");
-                    echo json_encode(null, JSON_PRETTY_PRINT);
+                    echo json_encode(true, JSON_PRETTY_PRINT);
                 }
             } catch (Exception $e) {
                 header("HTTP/1.1 404 Bad Request");
@@ -111,12 +121,6 @@ $klein->with('/MiBanco', function () use ($klein) {
             finally {
                 exit();
             }
-        }
-
-        else {
-            header("HTTP/1.1 401 Unauthorized");
-            exit('Unauthorized');
-        }
     });
 
     /**

@@ -3,6 +3,7 @@
 include_once('../persistence/userDB.php');
 include_once('../database/config.php');
 include_once('../database/utils.php');
+include_once('../auxiliar/cript.php');
 
 
 class LoginController {
@@ -25,7 +26,19 @@ class LoginController {
 
             $response = $this->dbUser->loginUser($usuario, $passwd);
 
-            return $response['tipo'];
+            if($response){
+                $validPass = validPass($passwd, trim($response['passwd']));
+                
+                if($validPass) {
+                    return $response['tipo'];
+                }
+
+                else{
+                    false;
+                }
+            }
+
+            return false;
         }
 
         catch (exception $e) {
