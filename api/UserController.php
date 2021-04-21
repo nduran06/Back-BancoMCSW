@@ -7,6 +7,7 @@ include_once('../persistence/userDB.php');
 include_once('../persistence/CuentaDB.php');
 include_once('../database/config.php');
 include_once('../database/utils.php');
+include_once('../auxiliar/cript.php');
 
 class UserController {
 
@@ -36,7 +37,19 @@ class UserController {
     public function validUser($document) {
 
         try {
-            return $this->dbExistedClients->getExistedUser($document);;
+            $numCuentaClientVidaReal = $this->dbExistedClients->getExistedUser($document);
+
+            if(isset($numCuentaClientVidaReal)) {
+                $cuentaClientVirtual = $this->dbCuenta->getAccount(trim($numCuentaClientVidaReal));
+
+                if(!$cuentaClientVirtual) {
+                    return true;
+                }
+                return false;
+            }
+
+            return false;
+
         }
 
         catch (exception $e) {
@@ -80,9 +93,12 @@ class UserController {
             /* Usuario cliente con cuenta bancaria */
             $responseExisted = $this->dbExistedClients->getExistedUser($documento);
 
-            if ($responseExisted) {
+            /* Usuario cliente con cuenta bancaria virtual */
+            $responseExistedVA = $this->dbCuenta->getAccount($responseExisted['num_cuenta']);
 
-                $usuario = new Usuario($documento, $responseExisted['nombre'], $nombreUsuario, $passwd, $tipoUsuario);
+            if ($responseExisted and !$responseExistedVA) {
+
+                $usuario = new Usuario($documento, $responseExisted['nombre'], $nombreUsuario, criptPass($passwd), $tipoUsuario);
 
                 $response = $this->dbUser->createUser($usuario);
 

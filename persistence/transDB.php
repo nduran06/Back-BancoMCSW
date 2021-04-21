@@ -141,6 +141,7 @@ include_once('externalEntDB.php');
 
                 } else {
 
+                    /* Simulación mock de la llamada a un banco externo */
                     $dbCuentaExterna = new ExternalEntDB($this->db, $this->dbConn);
 
                     $desAns = $dbCuentaExterna->updateBalance($destino, $nuevoSaldoMas, $banco_destino);
