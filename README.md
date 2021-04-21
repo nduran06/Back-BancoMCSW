@@ -54,5 +54,5 @@
 
 # Arquitectura
 
-![Arquitectura de la aplicacón](https://github.com/nduran06/Back-BancoMCSW/tree/master/imgs/arqui.jpeg)
+![Arquitectura de la aplicacón](https://github.com/nduran06/Back-BancoMCSW/blob/master/imgs/arqui.jpeg)
 
