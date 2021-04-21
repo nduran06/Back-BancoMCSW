@@ -1,4 +1,8 @@
 <?php
+
+//lineas agregadas -> 53 y 192
+//lineas modificadas -> 55 , 199 y 202
+
 require __DIR__ . '/../bootstrap.php';
 
 include('../Controllers/CustomerController.php');
@@ -45,10 +49,13 @@ $klein->with('/MiBanco', function () use ($klein) {
             $_POST = json_decode(array_keys($_POST)[0], true);
             $user = sanitizeParameter($_POST, 'usuario');
             $pass = sanitizeParameter($_POST, 'passwd');
+            
+            $passh=hash('sha256', $pass);
 
-            $userRole = $userLogin->login($user, $pass);
+            $userRole = $userLogin->login($user, $passh);
 
-            if ($userRole) {
+
+            if (isset($userRole)) {
                 $userController = new UserController();
                 $numCuenta = $userController->getUserAccount($user);
 
@@ -182,18 +189,20 @@ $klein->with('/MiBanco', function () use ($klein) {
                 $userUsuario = sanitizeParameter($_POST, 'usuario');
                 $passUsuario = sanitizeParameter($_POST, 'passwd');
 
+		$passUsuarioh=hash('sha256', $passUsuario);
+
                 $userController = new UserController();
 
                 $newUserResp = null;
 
                 if ($tipoUsuario === "cliente") {
-                    $newUserResp = $userController->createClientUser($docUsuario, $tipoUsuario, $userUsuario, $passUsuario);
+                    $newUserResp = $userController->createClientUser($docUsuario, $tipoUsuario, $userUsuario, $passUsuarioh);
 
                 } elseif ($tipoUsuario === "admin" or $tipoUsuario === "auditor") {
-                    $newUserResp = $userController->createHightUser($docUsuario, $tipoUsuario, $userUsuario, $passUsuario, $nombreUsuario);
+                    $newUserResp = $userController->createHightUser($docUsuario, $tipoUsuario, $userUsuario, $passUsuarioh, 										$nombreUsuario);
                 }
 
-                if ($newUserResp) {
+                if (isset($newUserResp)) {
                     echo json_encode($newUserResp, JSON_PRETTY_PRINT);
 
                 } else {
