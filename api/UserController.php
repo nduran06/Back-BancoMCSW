@@ -135,7 +135,7 @@ class UserController {
     public function createHightUser ($documento, $tipoUsuario, $nombreUsuario, $passwd, $nombre) {
 
         try {
-            $usuario = new Usuario($documento, $nombre, $nombreUsuario, $passwd, $tipoUsuario);
+            $usuario = new Usuario($documento, $nombre, $nombreUsuario, criptPass($passwd), $tipoUsuario);
 
             return $this->dbUser->createUser($usuario);;
         }
