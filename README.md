@@ -23,13 +23,13 @@
     [https://techviewleo.com/how-to-install-php-on-linux-mint/](https://techviewleo.com/how-to-install-php-on-linux-mint/) 
 
 
-2. Instalar el driver de postgres de php en la máquina.
+**3.** Instalar el driver de postgres de php en la máquina.
 
 ```
     sudo apt-get install php7.3-pgsql
 ```
 
-3. Instalar composer
+**4.** Instalar composer
 
 ```
     sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
