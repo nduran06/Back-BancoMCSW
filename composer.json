@@ -11,5 +11,8 @@
         "psr-4": {
             "Src\\": "src/"
         }
-    }
+    },
+    "require-dev": {
+        "heroku/heroku-buildpack-php": "*"
+  }
 }
