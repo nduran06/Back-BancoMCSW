@@ -1,9 +1,8 @@
 <?php
 
-//lineas agregadas -> 53 y 192
-//lineas modificadas -> 55 , 199 y 202
 
 require __DIR__ . '/../bootstrap.php';
+require('../vendor/autoload.php');
 
 include_once('../api/LoginController.php');
 include_once('../api/UserController.php');
